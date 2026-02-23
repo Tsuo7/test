@@ -3,270 +3,252 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title id="meta-title">TSUO ANIME | PLATAFORMA ELITE</title>
+    <title>TSUO ANIME V3 | MAXIMUS EDITION</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;600;900&family=Noto+Sans+JP:wght@900&display=swap" rel="stylesheet">
 
     <style>
-        :root {
-            --accent: #e11d48;
-            --bg: #fdfdfd;
-            --text: #0f172a;
-            --card: #ffffff;
-        }
-
-        .theme-dark { --bg: #020617; --text: #f8fafc; --card: #0f172a; }
-        .theme-forest { --bg: #f0fdf4; --text: #166534; --card: #ffffff; --accent: #16a34a; }
-
-        body { 
-            background-color: var(--bg); 
-            color: var(--text); 
-            font-family: 'Outfit', sans-serif;
-            transition: background 0.3s ease;
-            margin: 0;
-        }
-
-        .kanji-bg { 
-            position: fixed; top: 0; right: 0; font-size: 20rem; 
-            font-family: 'Noto Sans JP'; opacity: 0.03; z-index: -1; pointer-events: none;
-        }
-
-        .admin-sidebar button.active {
-            background-color: var(--accent);
-            color: white;
-        }
-
-        .anime-card:hover img { transform: scale(1.05); }
+        :root { --accent: #e11d48; --bg: #050507; --card: #0f1117; --text: #f8fafc; }
+        body { background: var(--bg); color: var(--text); font-family: 'Outfit', sans-serif; overflow-x: hidden; }
+        
+        .glass { background: rgba(15, 17, 23, 0.8); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.05); }
+        .anime-card { transition: all 0.3s ease; cursor: pointer; position: relative; }
+        .anime-card:hover { transform: translateY(-8px); shadow: 0 20px 40px rgba(0,0,0,0.5); }
+        .anime-card:hover .overlay { opacity: 1; }
+        
         .tab-content { display: none; }
         .tab-content.active { display: block; }
 
-        /* Estilo para garantir que o input seja clicável */
-        input, textarea, select {
-            position: relative;
-            z-index: 10;
-            cursor: text;
-        }
+        input, textarea, select { background: rgba(255,255,255,0.05) !important; border: 1px solid rgba(255,255,255,0.1) !important; color: white !important; outline: none; transition: 0.3s; }
+        input:focus { border-color: var(--accent) !important; box-shadow: 0 0 15px rgba(225,29,72,0.2); }
+
+        .star-active { color: #fbbf24; fill: #fbbf24; }
+        .star-inactive { color: #475569; }
+
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 10px; }
     </style>
 </head>
-<body class="theme-dark">
+<body>
 
-<div class="kanji-bg">日本</div>
-
-<nav class="fixed top-0 w-full z-[100] bg-[var(--bg)]/80 backdrop-blur-lg border-b border-black/5 dark:border-white/5 px-6 py-4">
+<nav class="fixed top-0 w-full z-[100] glass px-6 py-4 border-b border-white/5">
     <div class="max-w-7xl mx-auto flex justify-between items-center">
-        <div class="flex items-center gap-8">
+        <div class="flex items-center gap-10">
             <div class="flex items-center gap-2 cursor-pointer" onclick="showSection('home')">
-                <div id="site-logo" class="w-10 h-10 bg-[var(--accent)] text-white flex items-center justify-center rounded-lg font-black text-xl shadow-lg">T</div>
-                <h1 id="site-name" class="text-xl font-black uppercase tracking-tighter italic">TSUO <span class="text-[var(--accent)]">ANIME</span></h1>
+                <div class="w-10 h-10 bg-[var(--accent)] rounded-xl flex items-center justify-center font-black text-xl italic shadow-lg shadow-rose-900/40">T</div>
+                <h1 class="text-xl font-black uppercase italic tracking-tighter hidden sm:block">TSUO <span class="text-[var(--accent)]">MAX</span></h1>
             </div>
             <div class="hidden md:flex gap-6 text-[10px] font-black uppercase tracking-widest opacity-60">
                 <button onclick="showSection('home')" class="hover:text-[var(--accent)]">Início</button>
-                <button onclick="showSection('ranks')" class="hover:text-[var(--accent)]">Top 10</button>
-                <button onclick="showSection('categories')" class="hover:text-[var(--accent)]">Categorias</button>
-                <button onclick="showSection('about')" class="hover:text-[var(--accent)]">Sobre</button>
+                <button onclick="showSection('mylist')" class="hover:text-[var(--accent)]">Minha Lista</button>
+                <button onclick="showSection('categories')" class="hover:text-[var(--accent)]">Gêneros</button>
+                <button onclick="randomSeries()" class="text-[var(--accent)] flex items-center gap-2"><i data-lucide="shuffle" class="w-3 h-3"></i> Aleatório</button>
             </div>
         </div>
-
         <div class="flex items-center gap-4">
-            <div class="relative">
-                <input type="text" id="search-bar" oninput="doSearch(this.value)" placeholder="Procurar..." class="bg-black/5 dark:bg-white/5 border border-white/10 rounded-full py-2 px-4 text-xs w-40 md:w-64 outline-none focus:ring-1 ring-[var(--accent)]">
-                <i data-lucide="search" class="absolute right-3 top-2 w-4 h-4 opacity-40"></i>
-            </div>
-            <button onclick="openLogin()" class="p-2 hover:bg-white/10 rounded-full transition"><i data-lucide="lock" class="w-5 h-5"></i></button>
+            <input type="text" oninput="doSearch(this.value)" placeholder="Buscar..." class="rounded-full px-5 py-2 text-xs w-40 lg:w-64">
+            <button onclick="openLogin()" class="p-2 hover:text-[var(--accent)] transition"><i data-lucide="settings"></i></button>
         </div>
     </div>
 </nav>
 
-<main id="section-home" class="section pt-32 px-6 max-w-7xl mx-auto min-h-screen">
+<div id="mural-area" class="mt-28 px-6 max-w-7xl mx-auto">
+    </div>
+
+<main id="section-home" class="section pt-10 px-6 max-w-7xl mx-auto min-h-screen">
     <div id="hero-area" class="mb-16"></div>
     <div class="flex justify-between items-end mb-8">
-        <h2 class="text-3xl font-black uppercase italic">Últimos <span class="text-[var(--accent)]">Uploads</span></h2>
+        <h2 class="text-3xl font-black uppercase italic">Séries <span class="text-[var(--accent)]">Populares</span></h2>
     </div>
-    <div id="anime-grid" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-6 pb-20"></div>
+    <div id="anime-grid" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-6 pb-32"></div>
 </main>
 
-<main id="section-ranks" class="section hidden pt-32 px-6 max-w-4xl mx-auto min-h-screen">
-    <h2 class="text-5xl font-black uppercase italic mb-12">Top <span class="text-[var(--accent)]">10 Temporada</span></h2>
-    <div id="rank-container" class="space-y-4 pb-20"></div>
+<main id="section-mylist" class="section hidden pt-32 px-6 max-w-7xl mx-auto min-h-screen">
+    <h2 class="text-4xl font-black uppercase italic mb-10"><i data-lucide="heart" class="inline mr-3 text-[var(--accent)]"></i> Minha <span class="text-[var(--accent)]">Lista</span></h2>
+    <div id="mylist-grid" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-6 pb-32"></div>
 </main>
 
 <main id="section-categories" class="section hidden pt-32 px-6 max-w-7xl mx-auto min-h-screen">
-    <h2 class="text-3xl font-black uppercase italic mb-8">Navegar por <span class="text-[var(--accent)]">Tags</span></h2>
-    <div id="category-list" class="flex flex-wrap gap-4"></div>
+    <h2 class="text-4xl font-black uppercase italic mb-10">Explorar <span class="text-[var(--accent)]">Gêneros</span></h2>
+    <div id="category-list" class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4"></div>
 </main>
 
-<main id="section-about" class="section hidden pt-32 px-6 max-w-2xl mx-auto min-h-screen text-center">
-    <h2 class="text-4xl font-black uppercase italic mb-6">Sobre o <span class="text-[var(--accent)]">Projeto</span></h2>
-    <div id="about-display" class="text-gray-400 leading-relaxed"></div>
-</main>
-
-<div id="player-modal" class="fixed inset-0 z-[1000] hidden bg-black/95 items-center justify-center p-4">
-    <div class="w-full max-w-5xl bg-[var(--card)] rounded-[30px] overflow-hidden flex flex-col md:flex-row shadow-2xl">
-        <div class="flex-grow bg-black aspect-video md:aspect-auto flex items-center justify-center">
-            <video id="video-element" controls class="w-full h-full"></video>
+<div id="series-modal" class="fixed inset-0 z-[1000] hidden bg-black/98 items-center justify-center p-4">
+    <div class="w-full max-w-6xl glass rounded-[40px] overflow-hidden flex flex-col lg:flex-row h-[90vh] shadow-2xl relative">
+        <button onclick="closeModal()" class="absolute top-6 right-6 z-50 w-12 h-12 bg-white/5 rounded-full flex items-center justify-center hover:bg-rose-600 transition"><i data-lucide="x"></i></button>
+        
+        <div class="flex-grow bg-black flex flex-col">
+            <div id="video-container" class="flex-grow flex items-center justify-center relative bg-black">
+                <video id="main-player" controls class="w-full h-full object-contain"></video>
+                <div id="player-controls" class="absolute bottom-10 flex gap-4">
+                    <button id="prev-ep" class="px-6 py-2 bg-white/10 rounded-full text-[10px] font-black uppercase hidden">Anterior</button>
+                    <button id="next-ep" class="px-6 py-2 bg-[var(--accent)] rounded-full text-[10px] font-black uppercase hidden">Próximo</button>
+                </div>
+            </div>
+            <div class="p-8 border-t border-white/5">
+                <h3 id="m-title" class="text-3xl font-black uppercase italic mb-2">Título</h3>
+                <div class="flex items-center gap-4 mb-4">
+                    <div id="m-stars" class="flex gap-1 text-yellow-500"></div>
+                    <span id="m-rating-val" class="text-xs font-bold opacity-50">4.5</span>
+                </div>
+                <p id="m-desc" class="text-sm text-gray-400 line-clamp-2"></p>
+            </div>
         </div>
-        <div class="w-full md:w-80 p-8 overflow-y-auto">
-            <button onclick="closePlayer()" class="mb-6 flex items-center gap-2 text-[10px] font-bold uppercase opacity-50 hover:opacity-100"><i data-lucide="arrow-left" class="w-4 h-4"></i> Voltar</button>
-            <h3 id="p-title" class="text-2xl font-black uppercase italic mb-4">Título</h3>
-            <div id="p-tags" class="flex flex-wrap gap-2 mb-6"></div>
-            <p id="p-desc" class="text-xs text-gray-500 leading-relaxed"></p>
+
+        <div class="w-full lg:w-80 p-8 border-l border-white/5 overflow-y-auto">
+            <button id="fav-btn" onclick="toggleFavorite()" class="w-full py-4 mb-6 rounded-2xl border border-white/10 flex items-center justify-center gap-3 font-black text-[10px] uppercase hover:bg-rose-600/20 transition">
+                <i data-lucide="heart" class="w-4 h-4"></i> Adicionar à Lista
+            </button>
+            <h4 class="text-[10px] font-black uppercase opacity-40 mb-4 tracking-widest">Episódios</h4>
+            <div id="episode-list" class="space-y-2"></div>
         </div>
     </div>
 </div>
 
-<div id="login-modal" class="fixed inset-0 z-[2000] hidden bg-black/80 backdrop-blur-md items-center justify-center">
-    <div class="bg-[var(--card)] p-10 rounded-[40px] w-full max-w-sm text-center border border-white/5">
-        <h3 class="text-3xl font-black uppercase italic mb-8">Admin <span class="text-[var(--accent)]">Auth</span></h3>
-        <input type="password" id="admin-pass" placeholder="SENHA MESTRA" class="w-full p-4 bg-black/20 rounded-2xl mb-6 text-center font-black tracking-widest outline-none border border-white/10 focus:border-[var(--accent)]">
-        <div class="flex gap-2">
-            <button onclick="closeLogin()" class="flex-grow py-4 bg-white/5 rounded-2xl font-bold uppercase text-[10px]">Cancelar</button>
-            <button onclick="tryLogin()" class="flex-grow py-4 bg-[var(--accent)] text-white rounded-2xl font-bold uppercase text-[10px] shadow-lg">Entrar</button>
-        </div>
+<div id="login-modal" class="fixed inset-0 z-[2000] hidden bg-black/90 backdrop-blur-xl items-center justify-center">
+    <div class="bg-[var(--card)] p-12 rounded-[50px] w-full max-w-sm text-center border border-white/5">
+        <h3 class="text-2xl font-black uppercase italic mb-10">Master <span class="text-[var(--accent)]">Key</span></h3>
+        <input type="password" id="admin-pass" placeholder="CHAVE DE ACESSO" class="w-full p-5 rounded-2xl mb-8 text-center tracking-[1em] font-black">
+        <button onclick="tryLogin()" class="w-full py-5 bg-[var(--accent)] rounded-2xl font-black uppercase text-[10px]">Entrar no Painel</button>
     </div>
 </div>
 
-<div id="admin-panel" class="fixed inset-0 z-[3000] hidden bg-[var(--bg)] flex overflow-hidden">
-    <div class="w-64 bg-[var(--card)] border-r border-white/5 p-8 flex flex-col admin-sidebar">
-        <h2 class="text-xl font-black uppercase italic mb-10">Painel <span class="text-[var(--accent)]">Tsuo</span></h2>
-        <nav class="flex-grow space-y-2">
-            <button onclick="openTab('vids')" id="btn-vids" class="w-full text-left p-4 rounded-xl text-[10px] font-black uppercase tracking-widest active">Gerenciar Vídeos</button>
-            <button onclick="openTab('tags')" id="btn-tags" class="w-full text-left p-4 rounded-xl text-[10px] font-black uppercase tracking-widest">Criar Tags</button>
-            <button onclick="openTab('rank')" id="btn-rank" class="w-full text-left p-4 rounded-xl text-[10px] font-black uppercase tracking-widest">Rankings</button>
-            <button onclick="openTab('site')" id="btn-site" class="w-full text-left p-4 rounded-xl text-[10px] font-black uppercase tracking-widest">Configurações</button>
+<div id="admin-panel" class="fixed inset-0 z-[3000] hidden bg-[#08090d] flex overflow-hidden">
+    <aside class="w-72 border-r border-white/5 p-10 flex flex-col bg-[#0c0e14]">
+        <h2 class="text-xl font-black uppercase mb-12 italic">Admin <span class="text-[var(--accent)]">V3</span></h2>
+        <nav class="flex-grow space-y-3">
+            <button onclick="openTab('series')" class="w-full text-left p-4 rounded-xl text-[10px] font-black uppercase active">Séries & Episódios</button>
+            <button onclick="openTab('tags')" class="w-full text-left p-4 rounded-xl text-[10px] font-black uppercase">Tags</button>
+            <button onclick="openTab('config')" class="w-full text-left p-4 rounded-xl text-[10px] font-black uppercase">Site & Mural</button>
         </nav>
-        <button onclick="location.reload()" class="p-4 bg-red-500/10 text-red-500 rounded-xl font-bold text-[10px] uppercase">Sair</button>
-    </div>
+        <button onclick="location.reload()" class="p-5 bg-white/5 rounded-xl font-black text-[10px] uppercase">Sair</button>
+    </aside>
 
-    <main class="flex-grow p-12 overflow-y-auto">
-        <div id="tab-vids" class="tab-content active">
+    <main class="flex-grow p-16 overflow-y-auto">
+        <div id="tab-series" class="tab-content active">
             <div class="grid lg:grid-cols-2 gap-12">
-                <div class="space-y-4">
-                    <h3 class="text-2xl font-black uppercase italic mb-6">Novo <span class="text-[var(--accent)]">Vídeo</span></h3>
+                <div class="space-y-6">
+                    <h3 class="text-2xl font-black italic uppercase">Cadastrar <span class="text-[var(--accent)]">Série</span></h3>
                     <input type="hidden" id="edit-id">
-                    <input type="text" id="v-title" placeholder="Título do Anime" class="w-full p-4 bg-black/10 rounded-xl outline-none border border-white/5">
-                    <input type="text" id="v-thumb" placeholder="URL da Capa (Thumbnail)" class="w-full p-4 bg-black/10 rounded-xl outline-none border border-white/5">
-                    <input type="text" id="v-url" placeholder="URL do Vídeo (MP4/Stream)" class="w-full p-4 bg-black/10 rounded-xl outline-none border border-white/5">
-                    <textarea id="v-desc" placeholder="Sinopse..." class="w-full p-4 bg-black/10 rounded-xl outline-none border border-white/5 h-32"></textarea>
+                    <input type="text" id="v-title" placeholder="Nome do Anime" class="w-full p-4 rounded-xl">
+                    <input type="text" id="v-thumb" placeholder="URL da Capa" class="w-full p-4 rounded-xl">
+                    <textarea id="v-desc" placeholder="Sinopse..." class="w-full p-4 rounded-xl h-24"></textarea>
                     
-                    <div class="p-4 bg-black/10 rounded-xl">
-                        <p class="text-[10px] font-black uppercase opacity-50 mb-3">Vincular Tags</p>
+                    <div class="p-6 bg-white/5 rounded-2xl border border-white/5">
+                        <p class="text-[10px] font-black uppercase opacity-40 mb-4">Gerenciar Episódios</p>
+                        <div id="ep-inputs" class="space-y-2 mb-4"></div>
+                        <button onclick="addEpField()" class="text-[10px] font-black uppercase text-[var(--accent)]">+ Adicionar Episódio</button>
+                    </div>
+
+                    <div class="p-6 bg-white/5 rounded-2xl">
+                        <p class="text-[10px] font-black uppercase opacity-40 mb-4">Tags</p>
                         <div id="admin-tag-checks" class="flex flex-wrap gap-2"></div>
                     </div>
-                    <button onclick="saveVideo()" class="w-full py-5 bg-[var(--accent)] text-white rounded-2xl font-black uppercase italic shadow-xl">Publicar Agora</button>
+                    <button onclick="saveSeries()" class="w-full py-5 bg-[var(--accent)] rounded-2xl font-black uppercase italic">Salvar Série</button>
                 </div>
-                <div class="bg-black/10 p-8 rounded-3xl">
-                    <h3 class="text-sm font-black uppercase mb-6 opacity-50">Base de Dados</h3>
-                    <div id="admin-video-list" class="space-y-2"></div>
+                <div class="bg-white/5 p-8 rounded-3xl overflow-y-auto max-h-[700px]">
+                    <h4 class="text-xs font-black uppercase mb-6 opacity-30">Séries Postadas</h4>
+                    <div id="admin-series-list" class="space-y-2"></div>
                 </div>
             </div>
         </div>
 
         <div id="tab-tags" class="tab-content">
-            <h3 class="text-2xl font-black uppercase italic mb-8">Editor de <span class="text-[var(--accent)]">Tags</span></h3>
-            <div class="flex gap-4 mb-10">
-                <input type="text" id="new-tag-name" placeholder="Nome da Tag" class="flex-grow p-4 bg-black/10 rounded-xl">
-                <input type="color" id="new-tag-color" class="w-20 h-14 bg-transparent border-none">
-                <button onclick="addTag()" class="px-8 bg-[var(--accent)] text-white rounded-xl font-black uppercase text-[10px]">Adicionar</button>
+            <h3 class="text-2xl font-black italic uppercase mb-10">Gerenciar <span class="text-[var(--accent)]">Tags</span></h3>
+            <div class="flex gap-4 mb-10 max-w-xl">
+                <input type="text" id="new-tag-name" placeholder="Ex: Ação" class="flex-grow p-4 rounded-xl">
+                <input type="color" id="new-tag-color" value="#e11d48" class="w-20 h-14 rounded-xl p-1 bg-white/10">
+                <button onclick="createTag()" class="px-8 bg-[var(--accent)] rounded-xl font-black text-[10px] uppercase">Criar</button>
             </div>
             <div id="admin-tag-list" class="grid grid-cols-4 gap-4"></div>
         </div>
 
-        <div id="tab-rank" class="tab-content">
-            <h3 class="text-2xl font-black uppercase italic mb-8">Definir <span class="text-[var(--accent)]">Top 10</span></h3>
-            <div class="grid grid-cols-2 gap-10">
-                <div id="rank-slots" class="space-y-3"></div>
-                <div class="p-6 bg-yellow-500/10 rounded-2xl text-xs text-yellow-500 italic">
-                    Dica: Selecione os animes para cada posição. Eles aparecerão na seção de Rankings do site.
-                </div>
-            </div>
-        </div>
-
-        <div id="tab-site" class="tab-content">
-            <h3 class="text-2xl font-black uppercase italic mb-8">Configurações do <span class="text-[var(--accent)]">Site</span></h3>
-            <div class="max-w-xl space-y-6">
+        <div id="tab-config" class="tab-content">
+            <h3 class="text-2xl font-black italic uppercase mb-10">Global <span class="text-[var(--accent)]">Settings</span></h3>
+            <div class="max-w-2xl space-y-8">
                 <div>
-                    <label class="text-[10px] font-bold uppercase opacity-50">Nome da Plataforma</label>
-                    <input type="text" id="cfg-name" class="w-full p-4 bg-black/10 rounded-xl mt-2">
+                    <label class="text-[10px] font-black uppercase opacity-40">Título do Mural de Avisos</label>
+                    <input type="text" id="cfg-mural-title" class="w-full p-4 rounded-xl mt-2">
                 </div>
                 <div>
-                    <label class="text-[10px] font-bold uppercase opacity-50">Sobre Mim / Descrição</label>
-                    <textarea id="cfg-about" class="w-full p-4 bg-black/10 rounded-xl mt-2 h-40"></textarea>
+                    <label class="text-[10px] font-black uppercase opacity-40">Mensagem do Mural</label>
+                    <textarea id="cfg-mural-msg" class="w-full p-4 rounded-xl mt-2 h-24"></textarea>
                 </div>
-                <div>
-                    <label class="text-[10px] font-bold uppercase opacity-50">Tema Visual</label>
-                    <select id="cfg-theme" class="w-full p-4 bg-black/10 rounded-xl mt-2">
-                        <option value="theme-dark">Dark Mode (Padrão)</option>
-                        <option value="default">Sakura Mode (White)</option>
-                        <option value="theme-forest">Forest Mode (Green)</option>
-                    </select>
-                </div>
-                <button onclick="saveSiteConfig()" class="w-full py-5 bg-white text-black font-black rounded-2xl uppercase">Aplicar Mudanças</button>
+                <button onclick="saveConfig()" class="w-full py-5 bg-white text-black font-black rounded-2xl uppercase">Atualizar Mural e Site</button>
             </div>
         </div>
     </main>
 </div>
 
 <script>
-    // --- DATABASE ---
-    let db = JSON.parse(localStorage.getItem('tsuo_db_v3')) || {
-        videos: [],
-        tags: [{id: 1, name: 'Ação', color: '#ff4d4d'}, {id: 2, name: 'Hentai', color: '#bc13fe'}],
-        ranks: Array(10).fill(null),
-        config: { name: 'TSUO ANIME', about: 'Sua plataforma definitiva.', theme: 'theme-dark' }
+    // --- DB V3 ---
+    let db = JSON.parse(localStorage.getItem('tsuo_v3_db')) || {
+        series: [],
+        tags: [{id: 1, name: 'Ação', color: '#ff4d4d'}, {id: 2, name: 'Sci-Fi', color: '#0ea5e9'}],
+        config: { mural_title: 'NOVO LANÇAMENTO', mural_msg: 'Confira agora o episódio final de Chainsaw Man!', name: 'TSUO ANIME' },
+        favorites: []
     };
 
-    // --- CORE ---
-    function save() { localStorage.setItem('tsuo_db_v3', JSON.stringify(db)); }
+    let currentSeries = null;
+    let currentEpIndex = 0;
 
+    function save() { localStorage.setItem('tsuo_v3_db', JSON.stringify(db)); }
+
+    // --- RENDERERS ---
     function renderAll() {
+        renderMural();
         renderHome();
-        renderRanks();
         renderCategories();
-        updateSiteInfo();
-    }
-
-    function updateSiteInfo() {
-        document.getElementById('site-name').innerHTML = db.config.name.replace(" ", ` <span class="text-[var(--accent)]">`) + "</span>";
-        document.getElementById('about-display').innerText = db.config.about;
-        document.body.className = db.config.theme;
         lucide.createIcons();
     }
 
-    // --- SECTIONS ---
-    function showSection(id) {
-        document.querySelectorAll('.section').forEach(s => s.classList.add('hidden'));
-        document.getElementById('section-' + id).classList.remove('hidden');
-        window.scrollTo(0,0);
+    function renderMural() {
+        const area = document.getElementById('mural-area');
+        area.innerHTML = `
+            <div class="p-8 bg-gradient-to-r from-rose-900/40 to-black rounded-[30px] border border-rose-500/20 flex flex-col md:flex-row justify-between items-center gap-6">
+                <div>
+                    <span class="px-3 py-1 bg-rose-600 rounded-full text-[8px] font-black uppercase italic tracking-widest">Aviso Oficial</span>
+                    <h3 class="text-xl font-black uppercase italic mt-2">${db.config.mural_title}</h3>
+                    <p class="text-xs text-gray-400 mt-1">${db.config.mural_msg}</p>
+                </div>
+                <button onclick="showSection('home')" class="px-10 py-4 bg-white text-black font-black uppercase text-[10px] rounded-2xl hover:scale-105 transition">Entendido</button>
+            </div>
+        `;
     }
 
     function renderHome() {
         const grid = document.getElementById('anime-grid');
-        grid.innerHTML = db.videos.map(v => `
-            <div class="anime-card group cursor-pointer" onclick="openPlayer(${v.id})">
-                <div class="relative aspect-[3/4] rounded-2xl overflow-hidden mb-3 shadow-xl">
-                    <img src="${v.thumb}" class="w-full h-full object-cover transition duration-500">
-                    <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition">
-                        <i data-lucide="play" class="text-white w-12 h-12"></i>
+        grid.innerHTML = db.series.map(s => `
+            <div class="anime-card" onclick="openSeries(${s.id})">
+                <div class="relative aspect-[3/4.5] rounded-2xl overflow-hidden mb-3 shadow-xl">
+                    <img src="${s.thumb}" class="w-full h-full object-cover">
+                    <div class="overlay absolute inset-0 bg-black/60 opacity-0 flex items-center justify-center transition">
+                        <i data-lucide="play" class="w-10 h-10 text-[var(--accent)] fill-[var(--accent)]"></i>
                     </div>
                 </div>
-                <h4 class="text-xs font-black uppercase italic line-clamp-1">${v.title}</h4>
-                <p class="text-[9px] opacity-40 uppercase font-bold mt-1">${v.tags.map(tid => db.tags.find(t => t.id == tid)?.name).join(' • ')}</p>
+                <h4 class="text-[11px] font-black uppercase italic truncate">${s.title}</h4>
+                <div class="flex items-center justify-between mt-1">
+                    <span class="text-[8px] opacity-40 font-bold uppercase">${s.episodes.length} EPISÓDIOS</span>
+                    <div class="flex text-yellow-500 scale-75 origin-right"><i data-lucide="star" class="w-3 h-3 fill-current"></i></div>
+                </div>
             </div>
         `).join('');
 
-        // Hero (primeiro vídeo)
+        // Hero
         const hero = document.getElementById('hero-area');
-        if(db.videos.length > 0) {
-            const f = db.videos[0];
+        if(db.series.length > 0) {
+            const s = db.series[0];
             hero.innerHTML = `
-                <div class="relative w-full h-[400px] rounded-[40px] overflow-hidden shadow-2xl group cursor-pointer" onclick="openPlayer(${f.id})">
-                    <img src="${f.thumb}" class="w-full h-full object-cover scale-110 group-hover:scale-100 transition duration-1000">
-                    <div class="absolute inset-0 bg-gradient-to-r from-black via-black/40 to-transparent p-12 flex flex-col justify-end">
-                        <h2 class="text-5xl font-black uppercase italic mb-4">${f.title}</h2>
-                        <p class="max-w-md text-xs text-gray-400 line-clamp-2 mb-6">${f.desc}</p>
-                        <button class="w-fit px-8 py-4 bg-[var(--accent)] text-white rounded-xl font-black uppercase text-[10px] italic">Assistir Agora</button>
+                <div class="relative w-full h-[450px] rounded-[40px] overflow-hidden group cursor-pointer" onclick="openSeries(${s.id})">
+                    <img src="${s.thumb}" class="w-full h-full object-cover scale-110 group-hover:scale-100 transition duration-1000">
+                    <div class="absolute inset-0 bg-gradient-to-r from-black via-black/20 to-transparent p-12 flex flex-col justify-end">
+                        <h2 class="text-6xl font-black uppercase italic mb-4">${s.title}</h2>
+                        <div class="flex gap-2 mb-6">
+                            ${s.tags.map(tid => `<span class="px-3 py-1 glass rounded-lg text-[8px] font-black uppercase">${db.tags.find(t => t.id == tid)?.name}</span>`).join('')}
+                        </div>
+                        <button class="w-fit px-12 py-5 bg-[var(--accent)] rounded-2xl font-black uppercase italic text-xs">Começar a Assistir</button>
                     </div>
                 </div>
             `;
@@ -274,112 +256,132 @@
         lucide.createIcons();
     }
 
-    function renderRanks() {
-        const container = document.getElementById('rank-container');
-        container.innerHTML = db.ranks.map((vidId, index) => {
-            const v = db.videos.find(x => x.id == vidId);
-            if(!v) return '';
-            return `
-                <div class="flex items-center gap-6 p-4 bg-white/5 rounded-3xl group cursor-pointer hover:bg-[var(--accent)] transition" onclick="openPlayer(${v.id})">
-                    <span class="text-4xl font-black italic opacity-20 group-hover:opacity-100 transition">${index + 1}</span>
-                    <img src="${v.thumb}" class="w-20 h-28 object-cover rounded-xl shadow-lg">
-                    <div class="flex-grow">
-                        <h4 class="text-xl font-black uppercase italic">${v.title}</h4>
-                        <p class="text-[10px] opacity-50 line-clamp-1">${v.desc}</p>
-                    </div>
-                    <i data-lucide="chevron-right" class="opacity-20"></i>
-                </div>
-            `;
-        }).join('');
+    // --- LOGICA SERIES & PLAYER ---
+    function openSeries(id) {
+        currentSeries = db.series.find(s => s.id == id);
+        currentEpIndex = 0;
+        
+        document.getElementById('m-title').innerText = currentSeries.title;
+        document.getElementById('m-desc').innerText = currentSeries.desc;
+        
+        // Render Stars
+        const stars = document.getElementById('m-stars');
+        stars.innerHTML = '';
+        for(let i=1; i<=5; i++) stars.innerHTML += `<i data-lucide="star" class="w-4 h-4 ${i <= 4 ? 'star-active' : 'star-inactive'}"></i>`;
+        
+        // Render Episodes
+        const list = document.getElementById('episode-list');
+        list.innerHTML = currentSeries.episodes.map((ep, i) => `
+            <div onclick="playEpisode(${i})" class="p-4 bg-white/5 rounded-2xl border border-white/5 cursor-pointer hover:bg-[var(--accent)] transition flex justify-between items-center group">
+                <span class="text-[10px] font-black uppercase">EP ${i+1}: ${ep.title}</span>
+                <i data-lucide="play" class="w-3 h-3 opacity-0 group-hover:opacity-100"></i>
+            </div>
+        `).join('');
+
+        // Check Favorite
+        updateFavBtn();
+        
+        document.getElementById('series-modal').style.display = 'flex';
+        playEpisode(0);
         lucide.createIcons();
     }
 
-    function renderCategories() {
-        const list = document.getElementById('category-list');
-        list.innerHTML = db.tags.map(t => `
-            <button onclick="filterByTag(${t.id})" class="px-8 py-4 rounded-2xl bg-white/5 border border-white/10 hover:border-[var(--accent)] transition text-xs font-black uppercase italic">
-                ${t.name}
-            </button>
-        `).join('');
-    }
-
-    // --- SEARCH ---
-    function doSearch(val) {
-        if(!val) return renderHome();
-        const filtered = db.videos.filter(v => v.title.toLowerCase().includes(val.toLowerCase()));
-        const grid = document.getElementById('anime-grid');
-        grid.innerHTML = filtered.map(v => `
-            <div class="anime-card group cursor-pointer" onclick="openPlayer(${v.id})">
-                <div class="relative aspect-[3/4] rounded-2xl overflow-hidden mb-3">
-                    <img src="${v.thumb}" class="w-full h-full object-cover">
-                </div>
-                <h4 class="text-xs font-black uppercase italic">${v.title}</h4>
-            </div>
-        `).join('');
-    }
-
-    // --- PLAYER ---
-    function openPlayer(id) {
-        const v = db.videos.find(x => x.id == id);
-        document.getElementById('p-title').innerText = v.title;
-        document.getElementById('p-desc').innerText = v.desc;
-        const player = document.getElementById('video-element');
-        player.src = v.url;
+    function playEpisode(index) {
+        currentEpIndex = index;
+        const ep = currentSeries.episodes[index];
+        const player = document.getElementById('main-player');
+        player.src = ep.url;
         player.play();
 
-        const tagContainer = document.getElementById('p-tags');
-        tagContainer.innerHTML = v.tags.map(tid => {
-            const t = db.tags.find(x => x.id == tid);
-            return `<span class="px-3 py-1 rounded-md text-[9px] font-black uppercase" style="background: ${t.color}20; color: ${t.color}">${t.name}</span>`;
-        }).join('');
+        // Control buttons
+        document.getElementById('prev-ep').style.display = index > 0 ? 'block' : 'none';
+        document.getElementById('next-ep').style.display = index < currentSeries.episodes.length - 1 ? 'block' : 'none';
+        
+        document.getElementById('prev-ep').onclick = () => playEpisode(index - 1);
+        document.getElementById('next-ep').onclick = () => playEpisode(index + 1);
+    }
 
-        document.getElementById('player-modal').style.display = 'flex';
+    function toggleFavorite() {
+        if(db.favorites.includes(currentSeries.id)) {
+            db.favorites = db.favorites.filter(id => id != currentSeries.id);
+        } else {
+            db.favorites.push(currentSeries.id);
+        }
+        save();
+        updateFavBtn();
+        renderMyList();
+    }
+
+    function updateFavBtn() {
+        const btn = document.getElementById('fav-btn');
+        const isFav = db.favorites.includes(currentSeries.id);
+        btn.innerHTML = isFav ? `<i data-lucide="heart" class="w-4 h-4 fill-rose-600 text-rose-600"></i> Na Minha Lista` : `<i data-lucide="heart" class="w-4 h-4"></i> Adicionar à Lista`;
         lucide.createIcons();
     }
 
-    function closePlayer() {
-        const player = document.getElementById('video-element');
-        player.pause();
-        document.getElementById('player-modal').style.display = 'none';
+    function renderMyList() {
+        const grid = document.getElementById('mylist-grid');
+        const favs = db.series.filter(s => db.favorites.includes(s.id));
+        if(favs.length === 0) { grid.innerHTML = `<p class="opacity-20 italic">Sua lista está vazia...</p>`; return; }
+        grid.innerHTML = favs.map(s => `
+             <div class="anime-card" onclick="openSeries(${s.id})">
+                <img src="${s.thumb}" class="w-full aspect-[3/4.5] object-cover rounded-2xl mb-3 shadow-xl">
+                <h4 class="text-[11px] font-black uppercase italic">${s.title}</h4>
+            </div>
+        `).join('');
     }
 
-    // --- ADMIN ---
-    function openLogin() { document.getElementById('login-modal').style.display = 'flex'; }
-    function closeLogin() { document.getElementById('login-modal').style.display = 'none'; }
-    
-    function tryLogin() {
-        if(document.getElementById('admin-pass').value === '171088') {
-            closeLogin();
-            document.getElementById('admin-panel').style.display = 'flex';
-            renderAdminVideos();
-            renderAdminTags();
-            renderAdminRanks();
-            
-            // Populate Config
-            document.getElementById('cfg-name').value = db.config.name;
-            document.getElementById('cfg-about').value = db.config.about;
-            document.getElementById('cfg-theme').value = db.config.theme;
-        } else {
-            alert("Senha Incorreta!");
-        }
+    function randomSeries() {
+        if(db.series.length === 0) return;
+        const rand = db.series[Math.floor(Math.random() * db.series.length)];
+        openSeries(rand.id);
     }
 
-    function openTab(id) {
-        document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
-        document.querySelectorAll('.admin-sidebar button').forEach(b => b.classList.remove('active'));
-        document.getElementById('tab-' + id).classList.add('active');
-        document.getElementById('btn-' + id).classList.add('active');
+    // --- ADMIN ACTIONS ---
+    function addEpField(title = '', url = '') {
+        const div = document.createElement('div');
+        div.className = "flex gap-2";
+        div.innerHTML = `
+            <input type="text" placeholder="Nome Ep" value="${title}" class="v-ep-title flex-grow p-3 rounded-xl text-[10px]">
+            <input type="text" placeholder="URL ou Arquivo" value="${url}" class="v-ep-url flex-grow p-3 rounded-xl text-[10px]">
+            <button onclick="this.parentElement.remove()" class="text-red-500">X</button>
+        `;
+        document.getElementById('ep-inputs').appendChild(div);
     }
 
-    // ADMIN: VIDEOS
-    function renderAdminVideos() {
-        const list = document.getElementById('admin-video-list');
-        list.innerHTML = db.videos.map(v => `
-            <div class="flex justify-between items-center p-3 bg-white/5 rounded-xl border border-white/5">
-                <span class="text-[10px] font-bold uppercase">${v.title}</span>
-                <div class="flex gap-2">
-                    <button onclick="editVideo(${v.id})" class="text-blue-500 text-[9px] font-black">EDIT</button>
-                    <button onclick="deleteVideo(${v.id})" class="text-red-500 text-[9px] font-black">DEL</button>
+    function saveSeries() {
+        const epTitles = document.querySelectorAll('.v-ep-title');
+        const epUrls = document.querySelectorAll('.v-ep-url');
+        let episodes = [];
+        epTitles.forEach((el, i) => {
+            if(el.value) episodes.push({ title: el.value, url: epUrls[i].value });
+        });
+
+        const id = document.getElementById('edit-id').value;
+        const series = {
+            id: id ? parseInt(id) : Date.now(),
+            title: document.getElementById('v-title').value,
+            thumb: document.getElementById('v-thumb').value,
+            desc: document.getElementById('v-desc').value,
+            tags: Array.from(document.querySelectorAll('.v-tag-check:checked')).map(i => parseInt(i.value)),
+            episodes: episodes
+        };
+
+        if(id) db.series[db.series.findIndex(x => x.id == id)] = series;
+        else db.series.unshift(series);
+
+        save(); renderAll(); renderAdminSeries(); resetForm();
+        alert("Série Sincronizada!");
+    }
+
+    function renderAdminSeries() {
+        const list = document.getElementById('admin-series-list');
+        list.innerHTML = db.series.map(s => `
+            <div class="flex justify-between items-center p-4 bg-white/5 rounded-xl">
+                <span class="text-[10px] font-black uppercase">${s.title}</span>
+                <div class="flex gap-3">
+                    <button onclick="editSeries(${s.id})" class="text-blue-500 font-black text-[9px]">EDIT</button>
+                    <button onclick="deleteSeries(${s.id})" class="text-red-500 font-black text-[9px]">DEL</button>
                 </div>
             </div>
         `).join('');
@@ -393,120 +395,50 @@
         `).join('');
     }
 
-    function saveVideo() {
-        const id = document.getElementById('edit-id').value;
-        const tags = Array.from(document.querySelectorAll('.v-tag-check:checked')).map(i => parseInt(i.value));
-        
-        const video = {
-            id: id ? parseInt(id) : Date.now(),
-            title: document.getElementById('v-title').value,
-            thumb: document.getElementById('v-thumb').value,
-            url: document.getElementById('v-url').value,
-            desc: document.getElementById('v-desc').value,
-            tags: tags
-        };
-
-        if(id) {
-            const idx = db.videos.findIndex(v => v.id == id);
-            db.videos[idx] = video;
-        } else {
-            db.videos.unshift(video);
-        }
-
-        save();
-        renderHome();
-        renderAdminVideos();
-        resetVideoForm();
-        alert("Vídeo Sincronizado!");
+    function editSeries(id) {
+        const s = db.series.find(x => x.id == id);
+        document.getElementById('edit-id').value = s.id;
+        document.getElementById('v-title').value = s.title;
+        document.getElementById('v-thumb').value = s.thumb;
+        document.getElementById('v-desc').value = s.desc;
+        document.getElementById('ep-inputs').innerHTML = '';
+        s.episodes.forEach(ep => addEpField(ep.title, ep.url));
+        document.querySelectorAll('.v-tag-check').forEach(c => c.checked = s.tags.includes(parseInt(c.value)));
     }
 
-    function editVideo(id) {
-        const v = db.videos.find(x => x.id == id);
-        document.getElementById('edit-id').value = v.id;
-        document.getElementById('v-title').value = v.title;
-        document.getElementById('v-thumb').value = v.thumb;
-        document.getElementById('v-url').value = v.url;
-        document.getElementById('v-desc').value = v.desc;
-        // Check tags
-        document.querySelectorAll('.v-tag-check').forEach(c => {
-            c.checked = v.tags.includes(parseInt(c.value));
-        });
-    }
-
-    function deleteVideo(id) {
-        if(confirm("Excluir vídeo?")) {
-            db.videos = db.videos.filter(v => v.id != id);
-            save(); renderAdminVideos(); renderHome();
-        }
-    }
-
-    function resetVideoForm() {
+    function resetForm() {
         document.getElementById('edit-id').value = '';
         document.getElementById('v-title').value = '';
         document.getElementById('v-thumb').value = '';
-        document.getElementById('v-url').value = '';
         document.getElementById('v-desc').value = '';
+        document.getElementById('ep-inputs').innerHTML = '';
         document.querySelectorAll('.v-tag-check').forEach(c => c.checked = false);
     }
 
-    // ADMIN: TAGS
-    function renderAdminTags() {
-        const list = document.getElementById('admin-tag-list');
-        list.innerHTML = db.tags.map(t => `
-            <div class="p-4 rounded-xl flex justify-between items-center" style="background: ${t.color}20">
-                <span class="text-[10px] font-black uppercase" style="color: ${t.color}">${t.name}</span>
-                <button onclick="deleteTag(${t.id})" class="opacity-30 hover:opacity-100"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
-            </div>
-        `).join('');
-        lucide.createIcons();
+    // --- UTILS ---
+    function tryLogin() {
+        if(document.getElementById('admin-pass').value === '171088') {
+            document.getElementById('login-modal').style.display = 'none';
+            document.getElementById('admin-panel').style.display = 'flex';
+            renderAdminSeries();
+        } else alert("Chave inválida");
     }
 
-    function addTag() {
-        const name = document.getElementById('new-tag-name').value;
-        const color = document.getElementById('new-tag-color').value;
-        if(!name) return;
-        db.tags.push({ id: Date.now(), name, color });
-        save(); renderAdminTags(); renderAdminVideos();
-        document.getElementById('new-tag-name').value = '';
+    function showSection(id) {
+        document.querySelectorAll('.section').forEach(s => s.classList.add('hidden'));
+        document.getElementById('section-' + id).classList.remove('hidden');
+        if(id === 'mylist') renderMyList();
     }
 
-    function deleteTag(id) {
-        db.tags = db.tags.filter(t => t.id != id);
-        save(); renderAdminTags(); renderAdminVideos();
+    function openTab(id) {
+        document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+        document.getElementById('tab-' + id).classList.add('active');
     }
 
-    // ADMIN: RANKS
-    function renderAdminRanks() {
-        const slots = document.getElementById('rank-slots');
-        slots.innerHTML = db.ranks.map((current, i) => `
-            <div class="flex items-center gap-4">
-                <span class="w-8 font-black italic">#${i+1}</span>
-                <select onchange="updateRank(${i}, this.value)" class="flex-grow p-3 bg-black/20 rounded-xl text-[10px] font-bold outline-none border border-white/5">
-                    <option value="">Nenhum Selecionado</option>
-                    ${db.videos.map(v => `<option value="${v.id}" ${current == v.id ? 'selected' : ''}>${v.title}</option>`).join('')}
-                </select>
-            </div>
-        `).join('');
-    }
+    function openLogin() { document.getElementById('login-modal').style.display = 'flex'; }
+    function closeModal() { document.getElementById('series-modal').style.display = 'none'; document.getElementById('main-player').pause(); }
 
-    function updateRank(index, val) {
-        db.ranks[index] = val ? parseInt(val) : null;
-        save(); renderRanks();
-    }
-
-    // ADMIN: SITE
-    function saveSiteConfig() {
-        db.config.name = document.getElementById('cfg-name').value;
-        db.config.about = document.getElementById('cfg-about').value;
-        db.config.theme = document.getElementById('cfg-theme').value;
-        save();
-        alert("Site Atualizado!");
-        location.reload();
-    }
-
-    // --- INIT ---
     window.onload = renderAll;
-
 </script>
 </body>
 </html>
