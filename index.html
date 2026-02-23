@@ -1,293 +1,273 @@
 <!DOCTYPE html>
-<html lang="ja">
+<html lang="pt-br">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title id="meta-title">TSUO ANIME | 日本のプラットフォーム</title>
+    <title id="meta-title">TSUO ANIME | PLATAFORMA ELITE</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;500;900&family=Outfit:wght@300;600;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;600;900&family=Noto+Sans+JP:wght@900&display=swap" rel="stylesheet">
 
     <style>
         :root {
-            --p-accent: #e11d48; /* Crimson Japan */
-            --p-bg: #f8f9fa;
-            --p-card: #ffffff;
-            --p-text: #1a1a1a;
+            --accent: #e11d48;
+            --bg: #fdfdfd;
+            --text: #0f172a;
+            --card: #ffffff;
         }
 
-        /* Temas */
-        .theme-dark { --p-bg: #0a0a0b; --p-card: #141415; --p-text: #f0f0f0; --p-accent: #ff4d4d; }
-        .theme-matcha { --p-bg: #f2f4f2; --p-card: #ffffff; --p-text: #2d3e2d; --p-accent: #5d8233; }
-        .theme-midnight { --p-bg: #020617; --p-card: #0f172a; --p-text: #f8fafc; --p-accent: #38bdf8; }
+        .theme-dark { --bg: #020617; --text: #f8fafc; --card: #0f172a; }
+        .theme-forest { --bg: #f0fdf4; --text: #166534; --card: #ffffff; --accent: #16a34a; }
 
         body { 
-            background-color: var(--p-bg); 
-            color: var(--p-text); 
-            font-family: 'Outfit', 'Noto Sans JP', sans-serif;
-            transition: all 0.4s ease;
+            background-color: var(--bg); 
+            color: var(--text); 
+            font-family: 'Outfit', sans-serif;
+            transition: background 0.3s ease;
+            margin: 0;
         }
 
-        .jp-text { font-family: 'Noto Sans JP', sans-serif; writing-mode: vertical-rl; }
-        
-        .glass-nav {
-            background: rgba(255, 255, 255, 0.8);
-            backdrop-filter: blur(15px);
-            border-bottom: 1px solid rgba(0,0,0,0.05);
-        }
-        .theme-dark .glass-nav { background: rgba(10, 10, 11, 0.8); border-bottom: 1px solid rgba(255,255,255,0.05); }
-
-        .anime-card {
-            transition: all 0.5s cubic-bezier(0.165, 0.84, 0.44, 1);
-            cursor: pointer;
-        }
-        .anime-card:hover { transform: scale(1.03); }
-        .anime-card:hover .play-overlay { opacity: 1; }
-
-        .tag-pill {
-            padding: 2px 10px;
-            border-radius: 4px;
-            font-size: 10px;
-            font-weight: 800;
-            text-transform: uppercase;
+        .kanji-bg { 
+            position: fixed; top: 0; right: 0; font-size: 20rem; 
+            font-family: 'Noto Sans JP'; opacity: 0.03; z-index: -1; pointer-events: none;
         }
 
-        /* Modal Player */
-        #video-modal { background: rgba(0,0,0,0.95); backdrop-filter: blur(10px); }
-        
-        /* Custom Scrollbar */
-        ::-webkit-scrollbar { width: 6px; }
-        ::-webkit-scrollbar-thumb { background: var(--p-accent); border-radius: 10px; }
+        .admin-sidebar button.active {
+            background-color: var(--accent);
+            color: white;
+        }
 
+        .anime-card:hover img { transform: scale(1.05); }
         .tab-content { display: none; }
         .tab-content.active { display: block; }
+
+        /* Estilo para garantir que o input seja clicável */
+        input, textarea, select {
+            position: relative;
+            z-index: 10;
+            cursor: text;
+        }
     </style>
 </head>
-<body>
+<body class="theme-dark">
 
-<nav class="fixed top-0 w-full z-[100] glass-nav px-8 py-5">
+<div class="kanji-bg">日本</div>
+
+<nav class="fixed top-0 w-full z-[100] bg-[var(--bg)]/80 backdrop-blur-lg border-b border-black/5 dark:border-white/5 px-6 py-4">
     <div class="max-w-7xl mx-auto flex justify-between items-center">
-        <div class="flex items-center gap-12">
-            <div class="flex items-center gap-3">
-                <div id="site-logo" class="w-10 h-10 bg-[var(--p-accent)] text-white flex items-center justify-center rounded-lg font-black text-xl">T</div>
-                <h1 id="site-name" class="text-2xl font-black italic tracking-tighter uppercase">TSUO <span class="text-[var(--p-accent)]">ANIME</span></h1>
+        <div class="flex items-center gap-8">
+            <div class="flex items-center gap-2 cursor-pointer" onclick="showSection('home')">
+                <div id="site-logo" class="w-10 h-10 bg-[var(--accent)] text-white flex items-center justify-center rounded-lg font-black text-xl shadow-lg">T</div>
+                <h1 id="site-name" class="text-xl font-black uppercase tracking-tighter italic">TSUO <span class="text-[var(--accent)]">ANIME</span></h1>
             </div>
-            
-            <div class="hidden md:flex gap-8 text-[11px] font-bold uppercase tracking-widest opacity-70">
-                <a href="#" onclick="showSection('home')" class="hover:text-[var(--p-accent)] transition">Início</a>
-                <a href="#" onclick="showSection('ranks')" class="hover:text-[var(--p-accent)] transition">Rankings</a>
-                <a href="#" onclick="showSection('categories')" class="hover:text-[var(--p-accent)] transition">Categorias</a>
-                <a href="#" onclick="showSection('about')" class="hover:text-[var(--p-accent)] transition">Sobre</a>
+            <div class="hidden md:flex gap-6 text-[10px] font-black uppercase tracking-widest opacity-60">
+                <button onclick="showSection('home')" class="hover:text-[var(--accent)]">Início</button>
+                <button onclick="showSection('ranks')" class="hover:text-[var(--accent)]">Top 10</button>
+                <button onclick="showSection('categories')" class="hover:text-[var(--accent)]">Categorias</button>
+                <button onclick="showSection('about')" class="hover:text-[var(--accent)]">Sobre</button>
             </div>
         </div>
 
-        <div class="flex items-center gap-6">
-            <div class="relative hidden sm:block">
-                <input type="text" id="main-search" oninput="liveSearch(this.value)" placeholder="Buscar anime..." class="bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 rounded-full py-2 px-6 text-xs w-64 outline-none focus:border-[var(--p-accent)] transition">
-                <i data-lucide="search" class="absolute right-4 top-2 w-4 h-4 opacity-40"></i>
-                <div id="search-results" class="absolute top-12 left-0 w-full glass-nav rounded-2xl hidden overflow-hidden shadow-2xl border border-black/5"></div>
+        <div class="flex items-center gap-4">
+            <div class="relative">
+                <input type="text" id="search-bar" oninput="doSearch(this.value)" placeholder="Procurar..." class="bg-black/5 dark:bg-white/5 border border-white/10 rounded-full py-2 px-4 text-xs w-40 md:w-64 outline-none focus:ring-1 ring-[var(--accent)]">
+                <i data-lucide="search" class="absolute right-3 top-2 w-4 h-4 opacity-40"></i>
             </div>
-            <button onclick="openAdmin()" class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-black/5 transition"><i data-lucide="user-cog" class="w-5 h-5"></i></button>
+            <button onclick="openLogin()" class="p-2 hover:bg-white/10 rounded-full transition"><i data-lucide="lock" class="w-5 h-5"></i></button>
         </div>
     </div>
 </nav>
 
-<main id="section-home" class="pt-32 px-8 max-w-7xl mx-auto min-h-screen">
-    <div id="hero-featured" class="w-full h-[500px] rounded-[40px] mb-20 overflow-hidden relative shadow-2xl">
-        </div>
-
-    <div class="flex gap-4 mb-12 overflow-x-auto pb-4 no-scrollbar" id="home-tag-filters">
-        <button onclick="filterByTag('all')" class="px-6 py-2 bg-[var(--p-accent)] text-white text-[10px] font-bold uppercase rounded-full">Todos</button>
+<main id="section-home" class="section pt-32 px-6 max-w-7xl mx-auto min-h-screen">
+    <div id="hero-area" class="mb-16"></div>
+    <div class="flex justify-between items-end mb-8">
+        <h2 class="text-3xl font-black uppercase italic">Últimos <span class="text-[var(--accent)]">Uploads</span></h2>
     </div>
-
-    <h2 class="text-4xl font-black mb-10 italic uppercase">Lançamentos <span class="text-[var(--p-accent)]">Recentes</span></h2>
-    <div id="anime-grid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-8 pb-40">
-        </div>
+    <div id="anime-grid" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-6 pb-20"></div>
 </main>
 
-<main id="section-ranks" class="hidden pt-32 px-8 max-w-5xl mx-auto min-h-screen">
-    <h2 class="text-6xl font-black mb-4 uppercase italic">Top <span class="text-[var(--p-accent)]">10</span></h2>
-    <p class="text-gray-500 mono text-xs mb-16 uppercase tracking-[0.3em]">Os mais assistidos da temporada</p>
-    
-    <div id="rank-list" class="space-y-6 pb-40">
-        </div>
+<main id="section-ranks" class="section hidden pt-32 px-6 max-w-4xl mx-auto min-h-screen">
+    <h2 class="text-5xl font-black uppercase italic mb-12">Top <span class="text-[var(--accent)]">10 Temporada</span></h2>
+    <div id="rank-container" class="space-y-4 pb-20"></div>
 </main>
 
-<main id="section-categories" class="hidden pt-32 px-8 max-w-7xl mx-auto min-h-screen">
-    <h2 class="text-4xl font-black mb-12 uppercase italic">Explorar por <span class="text-[var(--p-accent)]">Gênero</span></h2>
-    <div id="category-cloud" class="grid grid-cols-2 md:grid-cols-4 gap-6">
-        </div>
+<main id="section-categories" class="section hidden pt-32 px-6 max-w-7xl mx-auto min-h-screen">
+    <h2 class="text-3xl font-black uppercase italic mb-8">Navegar por <span class="text-[var(--accent)]">Tags</span></h2>
+    <div id="category-list" class="flex flex-wrap gap-4"></div>
 </main>
 
-<main id="section-about" class="hidden pt-32 px-8 max-w-3xl mx-auto min-h-screen text-center">
-    <div class="w-32 h-32 bg-[var(--p-accent)] rounded-full mx-auto mb-10 flex items-center justify-center text-white text-5xl font-black">T</div>
-    <h2 class="text-4xl font-black mb-6 uppercase">Sobre o Criador</h2>
-    <div id="about-content" class="text-gray-500 leading-relaxed space-y-4">
-        </div>
+<main id="section-about" class="section hidden pt-32 px-6 max-w-2xl mx-auto min-h-screen text-center">
+    <h2 class="text-4xl font-black uppercase italic mb-6">Sobre o <span class="text-[var(--accent)]">Projeto</span></h2>
+    <div id="about-display" class="text-gray-400 leading-relaxed"></div>
 </main>
 
-<div id="video-modal" class="fixed inset-0 z-[1000] hidden items-center justify-center p-6">
-    <div class="w-full max-w-6xl flex flex-col lg:flex-row h-[85vh] glass-nav rounded-[40px] overflow-hidden shadow-2xl">
-        <div class="flex-grow bg-black relative">
-            <video id="main-player" controls class="w-full h-full object-contain"></video>
-            <button onclick="closePlayer()" class="absolute top-6 right-6 w-12 h-12 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center text-white backdrop-blur-md transition"><i data-lucide="x"></i></button>
+<div id="player-modal" class="fixed inset-0 z-[1000] hidden bg-black/95 items-center justify-center p-4">
+    <div class="w-full max-w-5xl bg-[var(--card)] rounded-[30px] overflow-hidden flex flex-col md:flex-row shadow-2xl">
+        <div class="flex-grow bg-black aspect-video md:aspect-auto flex items-center justify-center">
+            <video id="video-element" controls class="w-full h-full"></video>
         </div>
-        <div class="w-full lg:w-96 p-10 overflow-y-auto">
-            <h3 id="player-title" class="text-3xl font-black uppercase italic mb-4">Nome do Anime</h3>
-            <div id="player-tags" class="flex flex-wrap gap-2 mb-6"></div>
-            <p id="player-desc" class="text-gray-500 text-sm leading-relaxed mb-10">Descrição...</p>
-            <div class="p-6 border border-black/5 dark:border-white/5 rounded-3xl">
-                <h4 class="text-[10px] font-black uppercase tracking-widest mb-4 opacity-50">Sugeridos</h4>
-                <div id="suggested-list" class="space-y-4"></div>
-            </div>
+        <div class="w-full md:w-80 p-8 overflow-y-auto">
+            <button onclick="closePlayer()" class="mb-6 flex items-center gap-2 text-[10px] font-bold uppercase opacity-50 hover:opacity-100"><i data-lucide="arrow-left" class="w-4 h-4"></i> Voltar</button>
+            <h3 id="p-title" class="text-2xl font-black uppercase italic mb-4">Título</h3>
+            <div id="p-tags" class="flex flex-wrap gap-2 mb-6"></div>
+            <p id="p-desc" class="text-xs text-gray-500 leading-relaxed"></p>
         </div>
     </div>
 </div>
 
-<div id="adminPanel" class="fixed inset-0 z-[2000] hidden bg-[#f8f9fa] dark:bg-[#0a0a0b] overflow-hidden">
-    <div class="flex h-full">
-        <aside class="w-80 bg-white dark:bg-[#111112] border-r border-black/5 dark:border-white/5 p-10 flex flex-col">
-            <div class="mb-12">
-                <h2 class="text-2xl font-black uppercase italic">Admin <span class="text-[var(--p-accent)]">Panel</span></h2>
-                <p class="text-[9px] mono opacity-50 uppercase tracking-widest mt-1">Nihon Engine V1.0</p>
-            </div>
-            <nav class="flex-grow space-y-3">
-                <button onclick="switchTab('adm-videos')" class="w-full text-left p-4 rounded-2xl hover:bg-[var(--p-accent)] hover:text-white transition font-bold text-xs uppercase flex items-center gap-4"><i data-lucide="play-circle" class="w-4 h-4"></i> Vídeos</button>
-                <button onclick="switchTab('adm-tags')" class="w-full text-left p-4 rounded-2xl hover:bg-[var(--p-accent)] hover:text-white transition font-bold text-xs uppercase flex items-center gap-4"><i data-lucide="tag" class="w-4 h-4"></i> Tags & Gêneros</button>
-                <button onclick="switchTab('adm-ranks')" class="w-full text-left p-4 rounded-2xl hover:bg-[var(--p-accent)] hover:text-white transition font-bold text-xs uppercase flex items-center gap-4"><i data-lucide="award" class="w-4 h-4"></i> Rankings</button>
-                <button onclick="switchTab('adm-site')" class="w-full text-left p-4 rounded-2xl hover:bg-[var(--p-accent)] hover:text-white transition font-bold text-xs uppercase flex items-center gap-4"><i data-lucide="settings" class="w-4 h-4"></i> Config Site</button>
-            </nav>
-            <button onclick="location.reload()" class="p-4 bg-black text-white dark:bg-white dark:text-black rounded-2xl font-black text-[10px] uppercase">Sair do Painel</button>
-        </aside>
-
-        <main class="flex-grow p-20 overflow-y-auto">
-            
-            <div id="adm-videos" class="tab-content active">
-                <div class="grid lg:grid-cols-2 gap-16">
-                    <div class="space-y-6">
-                        <h3 class="text-3xl font-black italic uppercase">Postar <span class="text-[var(--p-accent)]">Vídeo</span></h3>
-                        <input type="hidden" id="edit-id">
-                        <input type="text" id="v-title" placeholder="Título do Anime" class="w-full p-5 rounded-2xl bg-black/5 dark:bg-white/5 border-none outline-none focus:ring-2 ring-[var(--p-accent)]">
-                        <div class="grid grid-cols-2 gap-4">
-                            <input type="text" id="v-thumb" placeholder="URL da Thumbnail" class="w-full p-5 rounded-2xl bg-black/5 dark:bg-white/5 border-none">
-                            <input type="text" id="v-url" placeholder="URL do Vídeo (.mp4/Direct)" class="w-full p-5 rounded-2xl bg-black/5 dark:bg-white/5 border-none">
-                        </div>
-                        <textarea id="v-desc" placeholder="Sinopse/Descrição..." class="w-full p-5 rounded-2xl bg-black/5 dark:bg-white/5 border-none h-40"></textarea>
-                        
-                        <div class="p-6 bg-black/5 dark:bg-white/5 rounded-3xl">
-                            <h4 class="text-[10px] font-black uppercase tracking-widest mb-4">Selecionar Tags</h4>
-                            <div id="tag-selector-list" class="flex flex-wrap gap-3"></div>
-                        </div>
-                        
-                        <button onclick="saveVideo()" class="w-full py-6 bg-[var(--p-accent)] text-white font-black rounded-3xl uppercase italic shadow-xl">Salvar Anime na Base</button>
-                    </div>
-                    <div class="bg-black/5 dark:bg-white/5 rounded-[40px] p-10 overflow-y-auto max-h-[800px]">
-                        <h4 class="text-xl font-bold mb-8">Lista de Conteúdo</h4>
-                        <div id="adm-video-list" class="space-y-4"></div>
-                    </div>
-                </div>
-            </div>
-
-            <div id="adm-tags" class="tab-content">
-                <div class="max-w-xl space-y-8">
-                    <h3 class="text-3xl font-black italic uppercase">Gerenciar <span class="text-[var(--p-accent)]">Tags</span></h3>
-                    <div class="flex gap-4">
-                        <input type="text" id="t-name" placeholder="Nome da Tag (ex: Ação)" class="flex-grow p-5 rounded-2xl bg-black/5 border-none">
-                        <input type="color" id="t-color" class="w-20 h-16 rounded-2xl border-none p-1 cursor-pointer">
-                        <button onclick="saveTag()" class="px-10 bg-[var(--p-accent)] text-white font-black rounded-2xl uppercase">Criar</button>
-                    </div>
-                    <div id="adm-tag-list" class="grid grid-cols-2 gap-4"></div>
-                </div>
-            </div>
-
-            <div id="adm-ranks" class="tab-content">
-                <h3 class="text-3xl font-black italic uppercase mb-10">Definir <span class="text-[var(--p-accent)]">Top 10</span></h3>
-                <div class="grid lg:grid-cols-2 gap-10">
-                    <div id="rank-slots" class="space-y-4">
-                        </div>
-                    <div class="p-10 bg-black/5 rounded-[40px]">
-                        <p class="text-sm text-gray-500 mb-6">Arraste o ID do anime ou digite o ID nos slots ao lado para rankear.</p>
-                        <div id="adm-rank-ref" class="space-y-2"></div>
-                    </div>
-                </div>
-            </div>
-
-            <div id="adm-site" class="tab-content">
-                <div class="max-w-2xl space-y-12">
-                    <h3 class="text-3xl font-black italic uppercase">Site <span class="text-[var(--p-accent)]">Settings</span></h3>
-                    <div class="space-y-6">
-                        <input type="text" id="cfg-name" placeholder="Nome do Site" class="w-full p-5 rounded-2xl bg-black/5 border-none">
-                        <textarea id="cfg-about" placeholder="Texto da aba Sobre Mim..." class="w-full p-5 rounded-2xl bg-black/5 border-none h-40"></textarea>
-                        <select id="cfg-theme" onchange="applyTheme(this.value)" class="w-full p-5 rounded-2xl bg-black/5 border-none outline-none">
-                            <option value="default">Sakura Clean (White)</option>
-                            <option value="theme-dark">Midnight Shinobi (Dark)</option>
-                            <option value="theme-matcha">Kyoto Garden (Green)</option>
-                            <option value="theme-midnight">Deep Blue (Cyber)</option>
-                        </select>
-                        <button onclick="saveSiteConfig()" class="w-full py-6 bg-black text-white font-black rounded-2xl uppercase">Atualizar Plataforma</button>
-                    </div>
-                </div>
-            </div>
-
-        </main>
+<div id="login-modal" class="fixed inset-0 z-[2000] hidden bg-black/80 backdrop-blur-md items-center justify-center">
+    <div class="bg-[var(--card)] p-10 rounded-[40px] w-full max-w-sm text-center border border-white/5">
+        <h3 class="text-3xl font-black uppercase italic mb-8">Admin <span class="text-[var(--accent)]">Auth</span></h3>
+        <input type="password" id="admin-pass" placeholder="SENHA MESTRA" class="w-full p-4 bg-black/20 rounded-2xl mb-6 text-center font-black tracking-widest outline-none border border-white/10 focus:border-[var(--accent)]">
+        <div class="flex gap-2">
+            <button onclick="closeLogin()" class="flex-grow py-4 bg-white/5 rounded-2xl font-bold uppercase text-[10px]">Cancelar</button>
+            <button onclick="tryLogin()" class="flex-grow py-4 bg-[var(--accent)] text-white rounded-2xl font-bold uppercase text-[10px] shadow-lg">Entrar</button>
+        </div>
     </div>
 </div>
 
-<div id="loginModal" class="fixed inset-0 z-[5000] hidden items-center justify-center bg-white/95 dark:bg-black/95 backdrop-blur-xl">
-    <div class="w-full max-w-sm p-12 text-center">
-        <h3 class="text-4xl font-black uppercase italic mb-10">Master <span class="text-[var(--p-accent)]">Key</span></h3>
-        <input type="password" id="adm-pass" placeholder="CHAVE DE ACESSO" class="w-full p-6 bg-black/5 dark:bg-white/5 border-none rounded-3xl text-center font-bold tracking-[1em] outline-none focus:ring-2 ring-[var(--p-accent)] mb-8">
-        <button onclick="checkAuth()" class="w-full py-6 bg-[var(--p-accent)] text-white font-black rounded-3xl uppercase shadow-2xl">Acessar Admin</button>
+<div id="admin-panel" class="fixed inset-0 z-[3000] hidden bg-[var(--bg)] flex overflow-hidden">
+    <div class="w-64 bg-[var(--card)] border-r border-white/5 p-8 flex flex-col admin-sidebar">
+        <h2 class="text-xl font-black uppercase italic mb-10">Painel <span class="text-[var(--accent)]">Tsuo</span></h2>
+        <nav class="flex-grow space-y-2">
+            <button onclick="openTab('vids')" id="btn-vids" class="w-full text-left p-4 rounded-xl text-[10px] font-black uppercase tracking-widest active">Gerenciar Vídeos</button>
+            <button onclick="openTab('tags')" id="btn-tags" class="w-full text-left p-4 rounded-xl text-[10px] font-black uppercase tracking-widest">Criar Tags</button>
+            <button onclick="openTab('rank')" id="btn-rank" class="w-full text-left p-4 rounded-xl text-[10px] font-black uppercase tracking-widest">Rankings</button>
+            <button onclick="openTab('site')" id="btn-site" class="w-full text-left p-4 rounded-xl text-[10px] font-black uppercase tracking-widest">Configurações</button>
+        </nav>
+        <button onclick="location.reload()" class="p-4 bg-red-500/10 text-red-500 rounded-xl font-bold text-[10px] uppercase">Sair</button>
     </div>
+
+    <main class="flex-grow p-12 overflow-y-auto">
+        <div id="tab-vids" class="tab-content active">
+            <div class="grid lg:grid-cols-2 gap-12">
+                <div class="space-y-4">
+                    <h3 class="text-2xl font-black uppercase italic mb-6">Novo <span class="text-[var(--accent)]">Vídeo</span></h3>
+                    <input type="hidden" id="edit-id">
+                    <input type="text" id="v-title" placeholder="Título do Anime" class="w-full p-4 bg-black/10 rounded-xl outline-none border border-white/5">
+                    <input type="text" id="v-thumb" placeholder="URL da Capa (Thumbnail)" class="w-full p-4 bg-black/10 rounded-xl outline-none border border-white/5">
+                    <input type="text" id="v-url" placeholder="URL do Vídeo (MP4/Stream)" class="w-full p-4 bg-black/10 rounded-xl outline-none border border-white/5">
+                    <textarea id="v-desc" placeholder="Sinopse..." class="w-full p-4 bg-black/10 rounded-xl outline-none border border-white/5 h-32"></textarea>
+                    
+                    <div class="p-4 bg-black/10 rounded-xl">
+                        <p class="text-[10px] font-black uppercase opacity-50 mb-3">Vincular Tags</p>
+                        <div id="admin-tag-checks" class="flex flex-wrap gap-2"></div>
+                    </div>
+                    <button onclick="saveVideo()" class="w-full py-5 bg-[var(--accent)] text-white rounded-2xl font-black uppercase italic shadow-xl">Publicar Agora</button>
+                </div>
+                <div class="bg-black/10 p-8 rounded-3xl">
+                    <h3 class="text-sm font-black uppercase mb-6 opacity-50">Base de Dados</h3>
+                    <div id="admin-video-list" class="space-y-2"></div>
+                </div>
+            </div>
+        </div>
+
+        <div id="tab-tags" class="tab-content">
+            <h3 class="text-2xl font-black uppercase italic mb-8">Editor de <span class="text-[var(--accent)]">Tags</span></h3>
+            <div class="flex gap-4 mb-10">
+                <input type="text" id="new-tag-name" placeholder="Nome da Tag" class="flex-grow p-4 bg-black/10 rounded-xl">
+                <input type="color" id="new-tag-color" class="w-20 h-14 bg-transparent border-none">
+                <button onclick="addTag()" class="px-8 bg-[var(--accent)] text-white rounded-xl font-black uppercase text-[10px]">Adicionar</button>
+            </div>
+            <div id="admin-tag-list" class="grid grid-cols-4 gap-4"></div>
+        </div>
+
+        <div id="tab-rank" class="tab-content">
+            <h3 class="text-2xl font-black uppercase italic mb-8">Definir <span class="text-[var(--accent)]">Top 10</span></h3>
+            <div class="grid grid-cols-2 gap-10">
+                <div id="rank-slots" class="space-y-3"></div>
+                <div class="p-6 bg-yellow-500/10 rounded-2xl text-xs text-yellow-500 italic">
+                    Dica: Selecione os animes para cada posição. Eles aparecerão na seção de Rankings do site.
+                </div>
+            </div>
+        </div>
+
+        <div id="tab-site" class="tab-content">
+            <h3 class="text-2xl font-black uppercase italic mb-8">Configurações do <span class="text-[var(--accent)]">Site</span></h3>
+            <div class="max-w-xl space-y-6">
+                <div>
+                    <label class="text-[10px] font-bold uppercase opacity-50">Nome da Plataforma</label>
+                    <input type="text" id="cfg-name" class="w-full p-4 bg-black/10 rounded-xl mt-2">
+                </div>
+                <div>
+                    <label class="text-[10px] font-bold uppercase opacity-50">Sobre Mim / Descrição</label>
+                    <textarea id="cfg-about" class="w-full p-4 bg-black/10 rounded-xl mt-2 h-40"></textarea>
+                </div>
+                <div>
+                    <label class="text-[10px] font-bold uppercase opacity-50">Tema Visual</label>
+                    <select id="cfg-theme" class="w-full p-4 bg-black/10 rounded-xl mt-2">
+                        <option value="theme-dark">Dark Mode (Padrão)</option>
+                        <option value="default">Sakura Mode (White)</option>
+                        <option value="theme-forest">Forest Mode (Green)</option>
+                    </select>
+                </div>
+                <button onclick="saveSiteConfig()" class="w-full py-5 bg-white text-black font-black rounded-2xl uppercase">Aplicar Mudanças</button>
+            </div>
+        </div>
+    </main>
 </div>
 
 <script>
     // --- DATABASE ---
-    let db = JSON.parse(localStorage.getItem('tsuo_anime_db')) || {
+    let db = JSON.parse(localStorage.getItem('tsuo_db_v3')) || {
         videos: [],
-        tags: [{id: 1, name: 'Ação', color: '#ff4d4d'}, {id: 2, name: 'Aventura', color: '#38bdf8'}],
-        ranks: [],
-        config: { name: 'TSUO ANIME', theme: 'default', about: 'Bem-vindo ao portal definitivo de animes da TSUO Industries.' }
+        tags: [{id: 1, name: 'Ação', color: '#ff4d4d'}, {id: 2, name: 'Hentai', color: '#bc13fe'}],
+        ranks: Array(10).fill(null),
+        config: { name: 'TSUO ANIME', about: 'Sua plataforma definitiva.', theme: 'theme-dark' }
     };
 
-    // --- RENDERIZADORES ---
+    // --- CORE ---
+    function save() { localStorage.setItem('tsuo_db_v3', JSON.stringify(db)); }
+
+    function renderAll() {
+        renderHome();
+        renderRanks();
+        renderCategories();
+        updateSiteInfo();
+    }
+
+    function updateSiteInfo() {
+        document.getElementById('site-name').innerHTML = db.config.name.replace(" ", ` <span class="text-[var(--accent)]">`) + "</span>";
+        document.getElementById('about-display').innerText = db.config.about;
+        document.body.className = db.config.theme;
+        lucide.createIcons();
+    }
+
+    // --- SECTIONS ---
+    function showSection(id) {
+        document.querySelectorAll('.section').forEach(s => s.classList.add('hidden'));
+        document.getElementById('section-' + id).classList.remove('hidden');
+        window.scrollTo(0,0);
+    }
+
     function renderHome() {
         const grid = document.getElementById('anime-grid');
-        grid.innerHTML = '';
-        
-        db.videos.forEach(v => {
-            const vTags = db.tags.filter(t => v.tags.includes(t.id));
-            grid.innerHTML += `
-                <div class="anime-card group" onclick="playVideo(${v.id})">
-                    <div class="relative h-64 rounded-[30px] overflow-hidden shadow-lg mb-4">
-                        <img src="${v.thumb}" class="w-full h-full object-cover group-hover:scale-110 transition duration-700">
-                        <div class="play-overlay absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 transition">
-                            <div class="w-14 h-14 bg-white rounded-full flex items-center justify-center shadow-2xl">
-                                <i data-lucide="play" class="text-black fill-black w-6 h-6"></i>
-                            </div>
-                        </div>
-                    </div>
-                    <h4 class="font-bold text-sm uppercase leading-tight line-clamp-1">${v.title}</h4>
-                    <div class="flex flex-wrap gap-1 mt-2">
-                        ${vTags.map(t => `<span class="tag-pill" style="background: ${t.color}20; color: ${t.color}">${t.name}</span>`).join('')}
+        grid.innerHTML = db.videos.map(v => `
+            <div class="anime-card group cursor-pointer" onclick="openPlayer(${v.id})">
+                <div class="relative aspect-[3/4] rounded-2xl overflow-hidden mb-3 shadow-xl">
+                    <img src="${v.thumb}" class="w-full h-full object-cover transition duration-500">
+                    <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition">
+                        <i data-lucide="play" class="text-white w-12 h-12"></i>
                     </div>
                 </div>
-            `;
-        });
+                <h4 class="text-xs font-black uppercase italic line-clamp-1">${v.title}</h4>
+                <p class="text-[9px] opacity-40 uppercase font-bold mt-1">${v.tags.map(tid => db.tags.find(t => t.id == tid)?.name).join(' • ')}</p>
+            </div>
+        `).join('');
 
-        // Featured Hero (Top 1 ou último post)
-        const hero = document.getElementById('hero-featured');
+        // Hero (primeiro vídeo)
+        const hero = document.getElementById('hero-area');
         if(db.videos.length > 0) {
-            const feat = db.videos[db.ranks[0]-1] || db.videos[0];
+            const f = db.videos[0];
             hero.innerHTML = `
-                <img src="${feat.thumb}" class="w-full h-full object-cover">
-                <div class="absolute inset-0 bg-gradient-to-r from-black/80 via-black/40 to-transparent p-20 flex flex-col justify-end text-white">
-                    <span class="text-[var(--p-accent)] font-black uppercase tracking-[0.4em] mb-4 text-xs">Destaque da Semana</span>
-                    <h2 class="text-6xl font-black uppercase italic mb-6">${feat.title}</h2>
-                    <p class="max-w-xl text-gray-300 text-sm mb-10 line-clamp-3">${feat.desc}</p>
-                    <button onclick="playVideo(${feat.id})" class="w-fit px-12 py-5 bg-[var(--p-accent)] rounded-2xl font-black uppercase italic flex items-center gap-4 hover:scale-105 transition">Assistir Agora <i data-lucide="play-circle"></i></button>
+                <div class="relative w-full h-[400px] rounded-[40px] overflow-hidden shadow-2xl group cursor-pointer" onclick="openPlayer(${f.id})">
+                    <img src="${f.thumb}" class="w-full h-full object-cover scale-110 group-hover:scale-100 transition duration-1000">
+                    <div class="absolute inset-0 bg-gradient-to-r from-black via-black/40 to-transparent p-12 flex flex-col justify-end">
+                        <h2 class="text-5xl font-black uppercase italic mb-4">${f.title}</h2>
+                        <p class="max-w-md text-xs text-gray-400 line-clamp-2 mb-6">${f.desc}</p>
+                        <button class="w-fit px-8 py-4 bg-[var(--accent)] text-white rounded-xl font-black uppercase text-[10px] italic">Assistir Agora</button>
+                    </div>
                 </div>
             `;
         }
@@ -295,81 +275,127 @@
     }
 
     function renderRanks() {
-        const list = document.getElementById('rank-list');
-        list.innerHTML = '';
-        db.ranks.slice(0, 10).forEach((id, index) => {
-            const v = db.videos.find(x => x.id == id);
-            if(!v) return;
-            list.innerHTML += `
-                <div class="flex items-center gap-10 p-6 glass-nav rounded-3xl group cursor-pointer hover:border-[var(--p-accent)] transition" onclick="playVideo(${v.id})">
-                    <span class="text-7xl font-black italic opacity-20 group-hover:opacity-100 group-hover:text-[var(--p-accent)] transition">${index + 1}</span>
-                    <img src="${v.thumb}" class="w-40 h-24 object-cover rounded-2xl">
+        const container = document.getElementById('rank-container');
+        container.innerHTML = db.ranks.map((vidId, index) => {
+            const v = db.videos.find(x => x.id == vidId);
+            if(!v) return '';
+            return `
+                <div class="flex items-center gap-6 p-4 bg-white/5 rounded-3xl group cursor-pointer hover:bg-[var(--accent)] transition" onclick="openPlayer(${v.id})">
+                    <span class="text-4xl font-black italic opacity-20 group-hover:opacity-100 transition">${index + 1}</span>
+                    <img src="${v.thumb}" class="w-20 h-28 object-cover rounded-xl shadow-lg">
                     <div class="flex-grow">
-                        <h4 class="text-2xl font-black uppercase italic">${v.title}</h4>
-                        <p class="text-xs text-gray-500 line-clamp-1">${v.desc}</p>
+                        <h4 class="text-xl font-black uppercase italic">${v.title}</h4>
+                        <p class="text-[10px] opacity-50 line-clamp-1">${v.desc}</p>
                     </div>
-                    <i data-lucide="chevron-right" class="opacity-30"></i>
+                    <i data-lucide="chevron-right" class="opacity-20"></i>
                 </div>
             `;
-        });
+        }).join('');
         lucide.createIcons();
     }
 
-    // --- BUSCA DINÂMICA (FUZZY SEARCH) ---
-    function liveSearch(val) {
-        const box = document.getElementById('search-results');
-        if(!val) return box.classList.add('hidden');
-        
-        const results = db.videos.filter(v => v.title.toLowerCase().includes(val.toLowerCase()));
-        if(results.length === 0) return box.classList.add('hidden');
+    function renderCategories() {
+        const list = document.getElementById('category-list');
+        list.innerHTML = db.tags.map(t => `
+            <button onclick="filterByTag(${t.id})" class="px-8 py-4 rounded-2xl bg-white/5 border border-white/10 hover:border-[var(--accent)] transition text-xs font-black uppercase italic">
+                ${t.name}
+            </button>
+        `).join('');
+    }
 
-        box.innerHTML = results.map(v => `
-            <div class="p-4 hover:bg-[var(--p-accent)] hover:text-white cursor-pointer flex items-center gap-4 border-b border-black/5" onclick="playVideo(${v.id})">
-                <img src="${v.thumb}" class="w-12 h-12 rounded object-cover">
-                <span class="text-xs font-bold uppercase">${v.title}</span>
+    // --- SEARCH ---
+    function doSearch(val) {
+        if(!val) return renderHome();
+        const filtered = db.videos.filter(v => v.title.toLowerCase().includes(val.toLowerCase()));
+        const grid = document.getElementById('anime-grid');
+        grid.innerHTML = filtered.map(v => `
+            <div class="anime-card group cursor-pointer" onclick="openPlayer(${v.id})">
+                <div class="relative aspect-[3/4] rounded-2xl overflow-hidden mb-3">
+                    <img src="${v.thumb}" class="w-full h-full object-cover">
+                </div>
+                <h4 class="text-xs font-black uppercase italic">${v.title}</h4>
             </div>
         `).join('');
-        box.classList.remove('hidden');
     }
 
     // --- PLAYER ---
-    function playVideo(id) {
+    function openPlayer(id) {
         const v = db.videos.find(x => x.id == id);
-        if(!v) return;
-        
-        document.getElementById('player-title').innerText = v.title;
-        document.getElementById('player-desc').innerText = v.desc;
-        const player = document.getElementById('main-player');
+        document.getElementById('p-title').innerText = v.title;
+        document.getElementById('p-desc').innerText = v.desc;
+        const player = document.getElementById('video-element');
         player.src = v.url;
         player.play();
 
-        const tagBox = document.getElementById('player-tags');
-        const vTags = db.tags.filter(t => v.tags.includes(t.id));
-        tagBox.innerHTML = vTags.map(t => `<span class="tag-pill" style="background: ${t.color}20; color: ${t.color}">${t.name}</span>`).join('');
+        const tagContainer = document.getElementById('p-tags');
+        tagContainer.innerHTML = v.tags.map(tid => {
+            const t = db.tags.find(x => x.id == tid);
+            return `<span class="px-3 py-1 rounded-md text-[9px] font-black uppercase" style="background: ${t.color}20; color: ${t.color}">${t.name}</span>`;
+        }).join('');
 
-        document.getElementById('video-modal').style.display = 'flex';
-        
-        // Sugeridos (aleatórios)
-        const sug = db.videos.filter(x => x.id != id).slice(0, 3);
-        document.getElementById('suggested-list').innerHTML = sug.map(s => `
-            <div class="flex items-center gap-4 cursor-pointer hover:text-[var(--p-accent)]" onclick="playVideo(${s.id})">
-                <img src="${s.thumb}" class="w-16 h-10 rounded object-cover">
-                <span class="text-[10px] font-bold uppercase line-clamp-1">${s.title}</span>
-            </div>
-        `).join('');
+        document.getElementById('player-modal').style.display = 'flex';
+        lucide.createIcons();
     }
 
     function closePlayer() {
-        const player = document.getElementById('main-player');
+        const player = document.getElementById('video-element');
         player.pause();
-        player.src = '';
-        document.getElementById('video-modal').style.display = 'none';
+        document.getElementById('player-modal').style.display = 'none';
     }
 
-    // --- ADMIN ACTIONS ---
+    // --- ADMIN ---
+    function openLogin() { document.getElementById('login-modal').style.display = 'flex'; }
+    function closeLogin() { document.getElementById('login-modal').style.display = 'none'; }
+    
+    function tryLogin() {
+        if(document.getElementById('admin-pass').value === '171088') {
+            closeLogin();
+            document.getElementById('admin-panel').style.display = 'flex';
+            renderAdminVideos();
+            renderAdminTags();
+            renderAdminRanks();
+            
+            // Populate Config
+            document.getElementById('cfg-name').value = db.config.name;
+            document.getElementById('cfg-about').value = db.config.about;
+            document.getElementById('cfg-theme').value = db.config.theme;
+        } else {
+            alert("Senha Incorreta!");
+        }
+    }
+
+    function openTab(id) {
+        document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.admin-sidebar button').forEach(b => b.classList.remove('active'));
+        document.getElementById('tab-' + id).classList.add('active');
+        document.getElementById('btn-' + id).classList.add('active');
+    }
+
+    // ADMIN: VIDEOS
+    function renderAdminVideos() {
+        const list = document.getElementById('admin-video-list');
+        list.innerHTML = db.videos.map(v => `
+            <div class="flex justify-between items-center p-3 bg-white/5 rounded-xl border border-white/5">
+                <span class="text-[10px] font-bold uppercase">${v.title}</span>
+                <div class="flex gap-2">
+                    <button onclick="editVideo(${v.id})" class="text-blue-500 text-[9px] font-black">EDIT</button>
+                    <button onclick="deleteVideo(${v.id})" class="text-red-500 text-[9px] font-black">DEL</button>
+                </div>
+            </div>
+        `).join('');
+
+        const checks = document.getElementById('admin-tag-checks');
+        checks.innerHTML = db.tags.map(t => `
+            <label class="flex items-center gap-2 p-2 bg-white/5 rounded-lg cursor-pointer">
+                <input type="checkbox" value="${t.id}" class="v-tag-check">
+                <span class="text-[9px] font-bold uppercase">${t.name}</span>
+            </label>
+        `).join('');
+    }
+
     function saveVideo() {
         const id = document.getElementById('edit-id').value;
-        const selectedTags = Array.from(document.querySelectorAll('.tag-chk:checked')).map(el => parseInt(el.value));
+        const tags = Array.from(document.querySelectorAll('.v-tag-check:checked')).map(i => parseInt(i.value));
         
         const video = {
             id: id ? parseInt(id) : Date.now(),
@@ -377,121 +403,21 @@
             thumb: document.getElementById('v-thumb').value,
             url: document.getElementById('v-url').value,
             desc: document.getElementById('v-desc').value,
-            tags: selectedTags
+            tags: tags
         };
 
-        if(id) db.videos[db.videos.findIndex(x => x.id == id)] = video;
-        else db.videos.unshift(video);
-
-        saveToLocalStorage();
-        renderAdminVideos();
-        renderHome();
-        resetVideoForm();
-    }
-
-    function saveTag() {
-        const name = document.getElementById('t-name').value;
-        const color = document.getElementById('t-color').value;
-        if(!name) return;
-        db.tags.push({ id: Date.now(), name, color });
-        saveToLocalStorage();
-        renderAdminTags();
-    }
-
-    function saveRank(index, videoId) {
-        db.ranks[index] = parseInt(videoId);
-        saveToLocalStorage();
-        renderRanks();
-    }
-
-    function saveSiteConfig() {
-        db.config.name = document.getElementById('cfg-name').value;
-        db.config.about = document.getElementById('cfg-about').value;
-        db.config.theme = document.getElementById('cfg-theme').value;
-        saveToLocalStorage();
-        location.reload();
-    }
-
-    // --- ADMIN RENDERS ---
-    function renderAdminVideos() {
-        const list = document.getElementById('adm-video-list');
-        list.innerHTML = db.videos.map(v => `
-            <div class="flex justify-between items-center p-4 bg-white/50 dark:bg-black/20 rounded-2xl">
-                <div class="flex items-center gap-4">
-                    <img src="${v.thumb}" class="w-12 h-12 rounded-lg object-cover">
-                    <span class="text-xs font-bold uppercase">${v.title}</span>
-                </div>
-                <div class="flex gap-4">
-                    <button onclick="editVideo(${v.id})" class="text-blue-500 font-bold text-[10px]">EDIT</button>
-                    <button onclick="deleteVideo(${v.id})" class="text-red-500 font-bold text-[10px]">DEL</button>
-                </div>
-            </div>
-        `).join('');
-
-        // Tag selector no formulário
-        const selector = document.getElementById('tag-selector-list');
-        selector.innerHTML = db.tags.map(t => `
-            <label class="flex items-center gap-2 p-2 px-4 bg-white dark:bg-black/20 rounded-xl cursor-pointer">
-                <input type="checkbox" value="${t.id}" class="tag-chk">
-                <span class="text-[10px] font-bold uppercase">${t.name}</span>
-            </label>
-        `).join('');
-    }
-
-    function renderAdminTags() {
-        const list = document.getElementById('adm-tag-list');
-        list.innerHTML = db.tags.map(t => `
-            <div class="p-4 rounded-2xl flex justify-between items-center" style="background: ${t.color}20">
-                <span class="text-xs font-black uppercase" style="color: ${t.color}">${t.name}</span>
-                <button onclick="deleteTag(${t.id})" class="text-[10px] opacity-50">Remover</button>
-            </div>
-        `).join('');
-    }
-
-    function renderAdminRanks() {
-        const slots = document.getElementById('rank-slots');
-        slots.innerHTML = '';
-        for(let i=0; i<10; i++) {
-            slots.innerHTML += `
-                <div class="flex items-center gap-4">
-                    <span class="w-8 font-black text-xl italic">${i+1}</span>
-                    <select onchange="saveRank(${i}, this.value)" class="flex-grow p-4 bg-black/5 rounded-xl text-xs font-bold">
-                        <option value="">Selecionar Anime...</option>
-                        ${db.videos.map(v => `<option value="${v.id}" ${db.ranks[i] == v.id ? 'selected' : ''}>${v.title}</option>`).join('')}
-                    </select>
-                </div>
-            `;
+        if(id) {
+            const idx = db.videos.findIndex(v => v.id == id);
+            db.videos[idx] = video;
+        } else {
+            db.videos.unshift(video);
         }
-    }
 
-    // --- UTILS ---
-    function saveToLocalStorage() { localStorage.setItem('tsuo_anime_db', JSON.stringify(db)); }
-    function showSection(id) {
-        document.querySelectorAll('main').forEach(s => s.classList.add('hidden'));
-        document.getElementById('section-' + id).classList.remove('hidden');
-        if(id === 'ranks') renderRanks();
-    }
-    function switchTab(id) {
-        document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
-        document.getElementById(id).classList.add('active');
-        if(id === 'adm-ranks') renderAdminRanks();
-        if(id === 'adm-videos') renderAdminVideos();
-        if(id === 'adm-tags') renderAdminTags();
-    }
-    function applyTheme(t) { document.body.className = t; }
-    function openAdmin() { document.getElementById('loginModal').style.display = 'flex'; }
-    function checkAuth() {
-        if(document.getElementById('adm-pass').value === '171088') {
-            document.getElementById('loginModal').style.display = 'none';
-            document.getElementById('adminPanel').style.display = 'block';
-            renderAdminVideos();
-            renderAdminTags();
-        } else alert('Acesso Negado.');
-    }
-
-    function deleteVideo(id) {
-        db.videos = db.videos.filter(v => v.id != id);
-        saveToLocalStorage(); renderAdminVideos(); renderHome();
+        save();
+        renderHome();
+        renderAdminVideos();
+        resetVideoForm();
+        alert("Vídeo Sincronizado!");
     }
 
     function editVideo(id) {
@@ -501,7 +427,17 @@
         document.getElementById('v-thumb').value = v.thumb;
         document.getElementById('v-url').value = v.url;
         document.getElementById('v-desc').value = v.desc;
-        switchTab('adm-videos');
+        // Check tags
+        document.querySelectorAll('.v-tag-check').forEach(c => {
+            c.checked = v.tags.includes(parseInt(c.value));
+        });
+    }
+
+    function deleteVideo(id) {
+        if(confirm("Excluir vídeo?")) {
+            db.videos = db.videos.filter(v => v.id != id);
+            save(); renderAdminVideos(); renderHome();
+        }
     }
 
     function resetVideoForm() {
@@ -510,16 +446,67 @@
         document.getElementById('v-thumb').value = '';
         document.getElementById('v-url').value = '';
         document.getElementById('v-desc').value = '';
-        document.querySelectorAll('.tag-chk').forEach(c => c.checked = false);
+        document.querySelectorAll('.v-tag-check').forEach(c => c.checked = false);
     }
 
-    window.onload = () => {
-        document.getElementById('site-name').innerHTML = db.config.name.replace(" ", ` <span class="text-[var(--p-accent)]">`) + "</span>";
-        document.getElementById('about-content').innerText = db.config.about;
-        applyTheme(db.config.theme);
-        renderHome();
+    // ADMIN: TAGS
+    function renderAdminTags() {
+        const list = document.getElementById('admin-tag-list');
+        list.innerHTML = db.tags.map(t => `
+            <div class="p-4 rounded-xl flex justify-between items-center" style="background: ${t.color}20">
+                <span class="text-[10px] font-black uppercase" style="color: ${t.color}">${t.name}</span>
+                <button onclick="deleteTag(${t.id})" class="opacity-30 hover:opacity-100"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+            </div>
+        `).join('');
         lucide.createIcons();
     }
+
+    function addTag() {
+        const name = document.getElementById('new-tag-name').value;
+        const color = document.getElementById('new-tag-color').value;
+        if(!name) return;
+        db.tags.push({ id: Date.now(), name, color });
+        save(); renderAdminTags(); renderAdminVideos();
+        document.getElementById('new-tag-name').value = '';
+    }
+
+    function deleteTag(id) {
+        db.tags = db.tags.filter(t => t.id != id);
+        save(); renderAdminTags(); renderAdminVideos();
+    }
+
+    // ADMIN: RANKS
+    function renderAdminRanks() {
+        const slots = document.getElementById('rank-slots');
+        slots.innerHTML = db.ranks.map((current, i) => `
+            <div class="flex items-center gap-4">
+                <span class="w-8 font-black italic">#${i+1}</span>
+                <select onchange="updateRank(${i}, this.value)" class="flex-grow p-3 bg-black/20 rounded-xl text-[10px] font-bold outline-none border border-white/5">
+                    <option value="">Nenhum Selecionado</option>
+                    ${db.videos.map(v => `<option value="${v.id}" ${current == v.id ? 'selected' : ''}>${v.title}</option>`).join('')}
+                </select>
+            </div>
+        `).join('');
+    }
+
+    function updateRank(index, val) {
+        db.ranks[index] = val ? parseInt(val) : null;
+        save(); renderRanks();
+    }
+
+    // ADMIN: SITE
+    function saveSiteConfig() {
+        db.config.name = document.getElementById('cfg-name').value;
+        db.config.about = document.getElementById('cfg-about').value;
+        db.config.theme = document.getElementById('cfg-theme').value;
+        save();
+        alert("Site Atualizado!");
+        location.reload();
+    }
+
+    // --- INIT ---
+    window.onload = renderAll;
+
 </script>
 </body>
 </html>
