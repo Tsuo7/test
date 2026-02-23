@@ -1,0 +1,753 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TSUO SOCIAIS | OMNI CORE V8</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Syncopate:wght@400;700&family=Rajdhani:wght@300;500;700;900&family=Space+Grotesk:wght@400;700&display=swap" rel="stylesheet">
+
+    <style id="themeStyles"></style>
+
+    <style>
+        :root { --p-purple: #bc13fe; --p-red: #ff0000; --p-gold: #ffd700; --p-white: #ffffff; }
+        body { transition: background 0.8s, color 0.8s; min-height: 100vh; overflow-x: hidden; margin: 0; user-select: none; }
+        
+        .syncopate { font-family: 'Syncopate', sans-serif; }
+        .rajdhani { font-family: 'Rajdhani', sans-serif; }
+        .space { font-family: 'Space Grotesk', sans-serif; }
+        
+        /* Fundo Animado */
+        #bg-overlay { position: fixed; inset: 0; pointer-events: none; z-index: -1; overflow: hidden; perspective: 1000px; }
+        .particle { position: absolute; pointer-events: none; transition: opacity 0.5s; filter: drop-shadow(0 0 5px var(--accent)); }
+
+        /* Efeitos 3D e Glassmorphism */
+        .neon-box { border: 1px solid var(--accent); background: rgba(0,0,0,0.6); backdrop-filter: blur(16px); transition: box-shadow 0.4s ease, border-color 0.4s ease; box-shadow: 0 0 15px var(--shadow); }
+        .tilt-card { transform-style: preserve-3d; transform: perspective(1000px); transition: transform 0.1s ease-out; }
+        .tilt-card img { transform: translateZ(30px); }
+        .tilt-card h3 { transform: translateZ(50px); }
+        .tilt-card .tag-badge { transform: translateZ(40px); }
+
+        .char-anim { display: inline-block; transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); cursor: default; }
+        .char-anim:hover { transform: translateY(-10px) scale(1.3) rotate(5deg); color: var(--accent); text-shadow: 0 0 20px var(--accent); }
+
+        /* Tags e Status */
+        .status-dot { width: 8px; height: 8px; background: #00ff00; border-radius: 50%; display: inline-block; box-shadow: 0 0 10px #00ff00; animation: pulse 1.5s infinite; }
+        @keyframes pulse { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.4; transform: scale(0.8); } }
+        
+        .tag-badge { padding: 4px 10px; border-radius: 6px; font-size: 10px; font-weight: bold; letter-spacing: 1px; }
+        .tag-script { background: linear-gradient(45deg, #6b21a8, #9333ea); color: #fff; box-shadow: 0 4px 15px rgba(147,51,234,0.4); }
+        .tag-executor { background: linear-gradient(45deg, #0891b2, #06b6d4); color: #fff; box-shadow: 0 4px 15px rgba(6,182,212,0.4); }
+
+        /* Modais Corrigidos (Sem classe flex direto no HTML para não bugar) */
+        .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.96); z-index: 9999; overflow-y: auto; backdrop-filter: blur(15px); padding: 20px; align-items: center; justify-content: center; }
+        .modal-content { width: 100%; animation: modalEnter 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards; opacity: 0; transform: translateY(40px) scale(0.95); }
+        @keyframes modalEnter { to { opacity: 1; transform: translateY(0) scale(1); } }
+
+        /* Botões e Inputs */
+        .btn-main { background: var(--accent); color: var(--btn-text); font-weight: bold; text-transform: uppercase; transition: all 0.3s; border: 1px solid rgba(255,255,255,0.2); cursor: pointer; position: relative; overflow: hidden; }
+        .btn-main::before { content: ''; position: absolute; top: 0; left: -100%; width: 100%; height: 100%; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent); transition: 0.5s; }
+        .btn-main:hover::before { left: 100%; }
+        .btn-main:hover { transform: scale(1.03) translateY(-2px); box-shadow: 0 10px 30px var(--shadow); }
+
+        input, textarea, select { background: rgba(255,255,255,0.03) !important; border: 1px solid rgba(255,255,255,0.1) !important; border-bottom: 2px solid var(--accent) !important; color: white !important; padding: 14px !important; outline: none !important; border-radius: 8px 8px 0 0; font-family: 'Space Grotesk', sans-serif; transition: 0.3s; }
+        input:focus, textarea:focus { background: rgba(255,255,255,0.08) !important; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        
+        .desc-text { white-space: pre-wrap; line-height: 1.8; word-break: break-word; font-family: 'Rajdhani', sans-serif; font-size: 1.15rem; }
+        
+        /* Tsora Chat */
+        .tsora-msg { padding: 12px 16px; border-radius: 12px; max-width: 85%; font-family: 'Space Grotesk', sans-serif; font-size: 14px; margin-bottom: 10px; animation: fadeIn 0.3s; line-height: 1.5; }
+        .msg-ai { background: rgba(var(--accent-rgb), 0.15); border-left: 3px solid var(--accent); color: #e2e8f0; }
+        .msg-user { background: rgba(255,255,255,0.05); border-right: 3px solid #64748b; color: white; align-self: flex-end; margin-left: auto; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        ::-webkit-scrollbar { width: 5px; }
+        ::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 10px; }
+    </style>
+</head>
+<body class="theme-nexus">
+
+<div id="bg-overlay"></div>
+
+<div class="fixed right-5 top-1/2 -translate-y-1/2 z-[500] flex flex-col gap-4">
+    <button onclick="openModal('tsoraModal')" class="w-12 h-12 rounded-full neon-box flex items-center justify-center hover:scale-110 group relative" title="Tsora - Inteligência Artificial">
+        <i data-lucide="bot" class="w-6 h-6 text-white group-hover:text-[var(--accent)] transition"></i>
+        <span class="absolute -left-32 bg-black/80 text-white text-[10px] syncopate py-1 px-3 rounded opacity-0 group-hover:opacity-100 transition pointer-events-none border border-white/20">TSORA_AI</span>
+    </button>
+    <button onclick="openModal('utilsModal')" class="w-12 h-12 rounded-full neon-box flex items-center justify-center hover:scale-110 group relative" title="Central de Rede">
+        <i data-lucide="activity" class="w-6 h-6 text-white group-hover:text-green-400 transition"></i>
+        <span class="absolute -left-32 bg-black/80 text-white text-[10px] syncopate py-1 px-3 rounded opacity-0 group-hover:opacity-100 transition pointer-events-none border border-white/20">NETWORK</span>
+    </button>
+</div>
+
+<nav class="p-6 md:p-10 flex flex-wrap justify-between items-center max-w-[1400px] mx-auto relative z-50 gap-4">
+    <div class="flex items-center gap-4 cursor-pointer group" onclick="location.reload()">
+        <div id="logoIcon" class="w-14 h-14 neon-box flex items-center justify-center syncopate font-bold text-3xl shadow-[0_0_20px_var(--shadow)]">T</div>
+        <div>
+            <h1 class="syncopate text-2xl tracking-tighter" id="logoText">TSUO</h1>
+            <div class="flex items-center gap-2 text-[10px] opacity-70 rajdhani font-bold tracking-widest mt-1">
+                <span class="status-dot"></span> <span id="pingDisplay">14</span>ms | <span id="onlineUsers">142</span> CONECTADOS
+            </div>
+        </div>
+    </div>
+    
+    <div class="flex gap-4 md:gap-8 items-center flex-wrap">
+        <div class="hidden lg:flex gap-8 syncopate text-xs font-bold mr-4">
+            <button onclick="filterCat('script')" class="hover:text-purple-400 transition tracking-widest">SCRIPTS</button>
+            <button onclick="filterCat('executor')" class="hover:text-cyan-400 transition tracking-widest">EXECUTORES</button>
+            <button onclick="filterCat('')" class="hover:text-white transition opacity-50 tracking-widest">TODOS</button>
+        </div>
+        <div class="relative">
+            <input type="text" id="searchInput" placeholder="BUSCAR ARQUIVO..." class="rounded-full py-2 px-6 text-xs w-40 md:w-56 focus:w-72 transition-all bg-black/50 backdrop-blur-md">
+            <i data-lucide="search" class="absolute right-4 top-3 w-4 h-4 opacity-50"></i>
+        </div>
+        <button onclick="openModal('loginModal')" class="btn-main px-8 py-3 rounded-xl text-xs syncopate tracking-widest">ADMIN</button>
+    </div>
+</nav>
+
+<main id="homeView" class="max-w-[1400px] mx-auto px-6 pt-10 relative z-10">
+    <div class="text-center mb-24">
+        <div class="inline-block px-6 py-2 border border-white/10 rounded-full text-[10px] space mb-6 bg-white/5 backdrop-blur-md text-gray-300">
+            EMPRESA TSUO SOCIALS // TECNOLOGIA AVANÇADA
+        </div>
+        <h2 id="mainTitle" class="syncopate text-5xl md:text-7xl lg:text-8xl font-black mb-6 tracking-tighter drop-shadow-2xl">TSUO SOCIAIS</h2>
+        <p class="text-lg md:text-xl opacity-60 space max-w-2xl mx-auto mb-12 leading-relaxed">
+            Arquitetura digital para distribuição de Scripts Luau e Executores de alto desempenho.
+        </p>
+
+        <div class="flex flex-wrap justify-center gap-4">
+            <button onclick="window.open('https://discord.gg/tsuo')" class="neon-box px-8 py-4 flex items-center gap-3 group rounded-2xl hover:-translate-y-1 transition-all">
+                <i data-lucide="discord" class="group-hover:text-indigo-400 transition w-5 h-5"></i>
+                <span class="syncopate font-bold text-xs tracking-widest">DISCORD</span>
+            </button>
+            <button onclick="window.open('https://youtube.com/@tsuo')" class="neon-box px-8 py-4 flex items-center gap-3 group rounded-2xl hover:-translate-y-1 transition-all">
+                <i data-lucide="youtube" class="group-hover:text-red-500 transition w-5 h-5"></i>
+                <span class="syncopate font-bold text-xs tracking-widest">YOUTUBE</span>
+            </button>
+        </div>
+    </div>
+
+    <div id="postFeed" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 pb-40">
+        </div>
+</main>
+
+<div id="loginModal" class="modal-overlay">
+    <div class="modal-content max-w-sm">
+        <div class="neon-box p-10 w-full rounded-3xl text-center relative overflow-hidden">
+            <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-[var(--accent)] to-transparent opacity-50"></div>
+            <i data-lucide="shield-alert" class="w-12 h-12 mx-auto mb-6 text-[var(--accent)] drop-shadow-[0_0_10px_var(--accent)]"></i>
+            <h3 class="syncopate text-xl mb-2">ACESSO RESTRITO</h3>
+            <p class="text-[10px] space text-gray-400 mb-8">SISTEMA PROTEGIDO POR CRIPTOGRAFIA</p>
+            
+            <input type="text" id="user" placeholder="ID DE USUÁRIO" class="w-full mb-4 text-center space text-sm tracking-widest uppercase">
+            <input type="password" id="pass" placeholder="CHAVE DE ACESSO" class="w-full mb-8 text-center space text-sm tracking-widest uppercase">
+            
+            <button onclick="handleLogin()" class="btn-main w-full py-4 rounded-xl mb-4">AUTENTICAR</button>
+            <button onclick="closeModal('loginModal')" class="text-[10px] opacity-50 hover:opacity-100 transition space uppercase">CANCELAR CONEXÃO</button>
+        </div>
+    </div>
+</div>
+
+<div id="adminPanel" class="modal-overlay">
+    <div class="modal-content max-w-[1400px]">
+        <div class="bg-[#05000a] border border-white/10 rounded-[40px] p-6 md:p-10 shadow-2xl h-[90vh] overflow-y-auto relative">
+            
+            <div class="flex flex-wrap justify-between items-center mb-10 border-b border-white/10 pb-6 gap-4 sticky top-0 bg-[#05000a]/90 backdrop-blur-md z-10 pt-4">
+                <div>
+                    <h2 class="syncopate text-2xl md:text-3xl text-white">TSUO_OMNI_PANEL <span class="text-[10px] text-green-400 border border-green-400/30 px-2 py-1 rounded ml-2 align-middle">V8 ONLINE</span></h2>
+                </div>
+                <div class="flex gap-3">
+                    <button onclick="exportData()" class="bg-blue-600/20 border border-blue-500 text-blue-400 px-4 py-2 rounded-lg font-bold text-xs flex items-center gap-2 hover:bg-blue-600/40 transition"><i data-lucide="download" class="w-4 h-4"></i> BACKUP JSON</button>
+                    <button onclick="location.reload()" class="bg-red-600/20 border border-red-500 text-red-400 px-4 py-2 rounded-lg font-bold text-xs flex items-center gap-2 hover:bg-red-600/40 transition"><i data-lucide="power" class="w-4 h-4"></i> DESCONECTAR</button>
+                </div>
+            </div>
+
+            <div class="grid lg:grid-cols-3 gap-8">
+                <div class="space-y-8">
+                    <div class="neon-box p-6 rounded-3xl">
+                        <h4 class="syncopate text-xs mb-6 text-yellow-400 flex items-center gap-2"><i data-lucide="palette" class="w-4 h-4"></i> MULTIVERSO (TEMAS)</h4>
+                        <div class="grid grid-cols-2 gap-3">
+                            <button onclick="setTheme('nexus')" class="p-3 bg-[#05000a] border border-purple-500 rounded-xl text-[10px] syncopate text-purple-400 hover:bg-purple-900/50 transition">VIOLET NEXUS</button>
+                            <button onclick="setTheme('raven')" class="p-3 bg-black border border-white/50 rounded-xl text-[10px] text-white syncopate hover:bg-white/10 transition">SILENT RAVEN</button>
+                            <button onclick="setTheme('blood')" class="p-3 bg-[#0a0000] border border-red-600 rounded-xl text-[10px] syncopate text-red-500 hover:bg-red-900/50 transition">BLOOD BLADE</button>
+                            <button onclick="setTheme('gold')" class="p-3 bg-[#050500] border border-yellow-500 rounded-xl text-[10px] syncopate text-yellow-500 hover:bg-yellow-900/50 transition">CYBER GOLD</button>
+                        </div>
+                    </div>
+
+                    <div class="neon-box p-6 rounded-3xl">
+                        <h4 class="syncopate text-xs mb-6 text-cyan-400 flex items-center gap-2"><i data-lucide="user-cog" class="w-4 h-4"></i> IDENTIDADE TSUO</h4>
+                        <input type="text" id="myPfp" placeholder="URL DA SUA FOTO DE PERFIL" class="w-full mb-4 text-xs">
+                        <input type="text" id="myDiscord" placeholder="URL DO SEU DISCORD" class="w-full mb-4 text-xs">
+                        <textarea id="myBio" placeholder="SOBRE VOCÊ (Aparece no modal de perfil)" class="w-full h-24 text-xs mb-4 resize-none"></textarea>
+                        <button onclick="saveProfile()" class="btn-main w-full py-4 text-[10px] rounded-xl">SALVAR IDENTIDADE</button>
+                    </div>
+                </div>
+
+                <div class="neon-box p-8 rounded-3xl lg:col-span-2">
+                    <h4 class="syncopate text-xs mb-8 text-green-400 flex items-center gap-2"><i data-lucide="database" class="w-4 h-4"></i> CENTRAL DE CONTEÚDO</h4>
+                    
+                    <div class="grid md:grid-cols-2 gap-8 mb-10">
+                        <div class="space-y-5">
+                            <input type="hidden" id="editId">
+                            <div class="relative">
+                                <span class="absolute -top-2 left-3 bg-black text-[9px] px-1 text-gray-400 space">TÍTULO</span>
+                                <input type="text" id="pTitle" class="w-full text-sm">
+                            </div>
+                            
+                            <div class="relative">
+                                <span class="absolute -top-2 left-3 bg-black text-[9px] px-1 text-gray-400 space">TIPO DE ARQUIVO</span>
+                                <select id="pCat" class="w-full text-sm">
+                                    <option value="script">SCRIPT LUA</option>
+                                    <option value="executor">EXECUTOR</option>
+                                </select>
+                            </div>
+
+                            <div class="grid grid-cols-2 gap-4">
+                                <div class="relative">
+                                    <span class="absolute -top-2 left-3 bg-black text-[9px] px-1 text-gray-400 space">BOTÃO TEXTO</span>
+                                    <input type="text" id="pBtnName" placeholder="Ex: GET KEY" class="w-full text-sm">
+                                </div>
+                                <div class="relative">
+                                    <span class="absolute -top-2 left-3 bg-black text-[9px] px-1 text-gray-400 space">LINK (URL)</span>
+                                    <input type="text" id="pBtnLink" placeholder="https://..." class="w-full text-sm">
+                                </div>
+                            </div>
+                            
+                            <div class="relative">
+                                <span class="absolute -top-2 left-3 bg-black text-[9px] px-1 text-gray-400 space">URL DA CAPA (IMAGEM)</span>
+                                <input type="text" id="pImg" class="w-full text-sm">
+                            </div>
+                        </div>
+
+                        <div class="space-y-5 flex flex-col">
+                            <div class="relative flex-grow">
+                                <span class="absolute -top-2 left-3 bg-black text-[9px] px-1 text-gray-400 space z-10">DESCRIÇÃO (Aceita espaços/linhas)</span>
+                                <textarea id="pDesc" class="w-full h-full min-h-[120px] text-sm pt-4"></textarea>
+                            </div>
+                            <div class="relative">
+                                <span class="absolute -top-2 left-3 bg-black text-[9px] px-1 text-[var(--accent)] space z-10">SUA OBSERVAÇÃO (Opcional)</span>
+                                <textarea id="pNote" placeholder="Aviso sobre banimentos, atualizações..." class="w-full h-16 text-xs pt-4"></textarea>
+                            </div>
+                            <button onclick="savePost()" id="saveBtn" class="btn-main w-full py-5 rounded-xl text-sm mt-auto shadow-[0_0_20px_var(--shadow)]">PUBLICAR DADOS</button>
+                        </div>
+                    </div>
+
+                    <div class="bg-black/40 border border-white/5 rounded-2xl p-6">
+                        <div class="flex justify-between items-center mb-4">
+                            <h4 class="syncopate text-xs text-gray-400">GERENCIAR DATABASE</h4>
+                            <div class="relative w-1/2">
+                                <i data-lucide="search" class="absolute left-3 top-2.5 w-4 h-4 text-gray-500"></i>
+                                <input type="text" id="adminSearch" placeholder="Procurar postagem..." class="w-full text-xs py-2 pl-10 bg-transparent border-none border-b border-gray-700 !rounded-none">
+                            </div>
+                        </div>
+                        <div id="adminPostList" class="space-y-2 max-h-60 overflow-y-auto pr-2 custom-scroll">
+                            </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="postPage" class="modal-overlay">
+    <div class="modal-content max-w-6xl">
+        <button onclick="closeModal('postPage')" class="syncopate text-sm mb-6 flex items-center gap-2 hover:-translate-x-2 transition text-white bg-black/50 px-6 py-2 rounded-full border border-white/10 backdrop-blur">
+            <i data-lucide="chevron-left"></i> RETORNAR
+        </button>
+        <div id="postContent" class="neon-box p-8 md:p-12 rounded-[30px] overflow-hidden relative">
+            </div>
+    </div>
+</div>
+
+<div id="profileModal" class="modal-overlay">
+    <div class="modal-content max-w-md">
+        <div class="neon-box p-12 w-full text-center rounded-[40px] relative overflow-hidden">
+            <div class="absolute -top-20 -right-20 w-40 h-40 bg-[var(--accent)] rounded-full blur-[80px] opacity-30"></div>
+            <img id="myPfpDisplay" src="" class="w-32 h-32 rounded-full mx-auto border-4 border-[var(--accent)] mb-6 object-cover shadow-[0_0_30px_var(--shadow)] relative z-10">
+            <h2 class="syncopate text-3xl mb-2 relative z-10">TSUO</h2>
+            <div class="text-[10px] space text-[var(--accent)] mb-6 tracking-widest border border-[var(--accent)] inline-block px-3 py-1 rounded-full bg-black/50">FOUNDER & CEO</div>
+            <p class="opacity-80 mb-10 desc-text text-sm relative z-10" id="myBioDisplay"></p>
+            <div class="flex flex-col gap-4 relative z-10">
+                <a href="#" id="myDiscordLink" target="_blank" class="btn-main py-4 rounded-xl text-sm flex justify-center items-center gap-2"><i data-lucide="discord" class="w-5 h-5"></i> ENTRAR NO SERVIDOR</a>
+                <button onclick="closeModal('profileModal')" class="text-[10px] opacity-50 hover:opacity-100 transition space uppercase mt-2">FECHAR</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="tsoraModal" class="modal-overlay">
+    <div class="modal-content max-w-2xl">
+        <div class="bg-[#0f172a] border border-[#3b82f6] rounded-3xl overflow-hidden shadow-[0_0_40px_rgba(59,130,246,0.3)] flex flex-col h-[80vh]">
+            <div class="bg-[#1e293b] p-4 border-b border-blue-500/30 flex justify-between items-center">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center border-2 border-blue-400 shadow-[0_0_15px_#3b82f6]">
+                        <i data-lucide="bot" class="text-white w-6 h-6"></i>
+                    </div>
+                    <div>
+                        <h3 class="syncopate text-blue-400 font-bold text-sm">TSORA AI</h3>
+                        <p class="text-[10px] text-gray-400 space flex items-center gap-1"><span class="w-2 h-2 bg-green-500 rounded-full inline-block"></span> Especialista em Roblox/Lua</p>
+                    </div>
+                </div>
+                <button onclick="closeModal('tsoraModal')" class="text-gray-400 hover:text-white"><i data-lucide="x"></i></button>
+            </div>
+            
+            <div id="tsoraChat" class="flex-grow p-6 overflow-y-auto flex flex-col custom-scroll bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] bg-black/40 bg-blend-overlay">
+                <div class="tsora-msg msg-ai shadow-lg">
+                    Olá, mestre! Eu sou a <b>Tsora</b>, assistente virtual da Tsuo Socials. <br><br>Fui treinada para ajudar com scripts Luau, criação de interfaces (GUIs) para Hubs e tirar dúvidas sobre exploradores do Roblox. Como posso ajudar seu código hoje?
+                </div>
+            </div>
+
+            <div class="p-4 bg-[#1e293b] border-t border-blue-500/30">
+                <form id="tsoraForm" class="flex gap-2" onsubmit="handleTsoraMsg(event)">
+                    <input type="text" id="tsoraInput" placeholder="Ex: Como criar um script hub no Roblox?" class="flex-grow !rounded-xl !border-blue-500/50 !bg-black/50 text-sm focus:!border-blue-400 !border-b" autocomplete="off">
+                    <button type="submit" class="bg-blue-600 hover:bg-blue-500 text-white p-4 rounded-xl transition"><i data-lucide="send" class="w-5 h-5"></i></button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="utilsModal" class="modal-overlay">
+    <div class="modal-content max-w-md">
+        <div class="neon-box p-10 rounded-3xl text-center relative">
+            <button onclick="closeModal('utilsModal')" class="absolute top-4 right-4 text-gray-500 hover:text-white"><i data-lucide="x"></i></button>
+            <h3 class="syncopate text-xl mb-6 text-green-400"><i data-lucide="activity" class="inline w-6 h-6 mr-2"></i> REDE & STATUS</h3>
+            
+            <div class="bg-black/50 border border-white/10 rounded-xl p-6 mb-6">
+                <p class="space text-xs text-gray-400 mb-2">LATÊNCIA DO SERVIDOR (PING)</p>
+                <div class="text-4xl syncopate font-black text-white" id="modalPingDisplay">14 <span class="text-sm text-green-400">ms</span></div>
+            </div>
+
+            <div class="bg-black/50 border border-white/10 rounded-xl p-6 mb-6">
+                <p class="space text-xs text-gray-400 mb-2">VELOCIDADE ESTIMADA (DOWNLOAD)</p>
+                <div class="text-3xl syncopate font-bold text-cyan-400" id="speedDisplay">-- <span class="text-sm">Mbps</span></div>
+                <button onclick="testNetwork()" id="testNetBtn" class="mt-4 bg-cyan-600/20 text-cyan-400 border border-cyan-500 px-4 py-2 rounded text-xs hover:bg-cyan-600/40 transition w-full">INICIAR TESTE</button>
+            </div>
+            
+            <div class="text-[10px] space text-gray-600 mt-4 text-left border-t border-white/10 pt-4">
+                SISTEMA OPERACIONAL: <span id="osDisplay">Detectando...</span><br>
+                SEGURANÇA: Nível 3 Ativo (DevTools Blocked)
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // ==========================================
+    // 1. SISTEMA DE SEGURANÇA E PROTEÇÃO BÁSICA
+    // ==========================================
+    // Nota: Como solicitado, adicionamos proteções estéticas. Backend é necessário para real segurança.
+    document.addEventListener('contextmenu', event => event.preventDefault()); // Bloqueia botão direito
+    document.onkeydown = function(e) {
+        if(e.keyCode == 123) return false; // F12
+        if(e.ctrlKey && e.shiftKey && e.keyCode == 'I'.charCodeAt(0)) return false; // Ctrl+Shift+I
+        if(e.ctrlKey && e.shiftKey && e.keyCode == 'J'.charCodeAt(0)) return false; // Ctrl+Shift+J
+        if(e.ctrlKey && e.keyCode == 'U'.charCodeAt(0)) return false; // Ctrl+U
+    }
+    console.log("%cTSUO SOCIALS %c| Acesso restrito. Área monitorada.", "color: #bc13fe; font-size: 30px; font-family: sans-serif; font-weight: bold;", "color: white; font-size: 14px;");
+
+    // ==========================================
+    // 2. CONFIGURAÇÕES E BANCO DE DADOS
+    // ==========================================
+    let posts = JSON.parse(localStorage.getItem('tsuo_v8_posts')) || [];
+    let owner = JSON.parse(localStorage.getItem('tsuo_v8_owner')) || {
+        pfp: 'https://i.pinimg.com/736x/8a/a5/d6/8aa5d6560da4230b05e04e768ba5094d.jpg',
+        bio: 'Fundador da Tsuo Socials. Trazendo a elite da tecnologia para o Roblox.',
+        discord: 'https://discord.gg/tsuo'
+    };
+    let currentTheme = localStorage.getItem('tsuo_v8_theme') || 'nexus';
+
+    const themes = {
+        nexus: { accent: '#bc13fe', bg: '#05000a', btnText: '#fff', shadow: 'rgba(188,19,254,0.3)', particle: '✦' },
+        raven: { accent: '#ffffff', bg: '#000000', btnText: '#000', shadow: 'rgba(255,255,255,0.15)', particle: '🐦' },
+        blood: { accent: '#ff0000', bg: '#050000', btnText: '#fff', shadow: 'rgba(255,0,0,0.4)', particle: '✗' },
+        gold:  { accent: '#ffd700', bg: '#050500', btnText: '#000', shadow: 'rgba(255,215,0,0.3)', particle: '❖' }
+    };
+
+    function setTheme(t) {
+        currentTheme = t;
+        localStorage.setItem('tsuo_v8_theme', t);
+        const c = themes[t];
+        document.documentElement.style.setProperty('--accent', c.accent);
+        document.documentElement.style.setProperty('--accent-rgb', hexToRgb(c.accent));
+        document.documentElement.style.setProperty('--btn-text', c.btnText);
+        document.documentElement.style.setProperty('--shadow', c.shadow);
+        document.body.style.background = c.bg;
+        
+        createParticles(c.particle);
+        renderFeed();
+        if(document.getElementById('adminPanel').style.display === 'flex') loadAdminList();
+    }
+
+    function hexToRgb(hex) {
+        let result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+        return result ? `${parseInt(result[1], 16)}, ${parseInt(result[2], 16)}, ${parseInt(result[3], 16)}` : '255,255,255';
+    }
+
+    function createParticles(char) {
+        const container = document.getElementById('bg-overlay');
+        container.innerHTML = '';
+        for(let i=0; i < 25; i++) {
+            const p = document.createElement('div');
+            p.className = 'particle syncopate';
+            p.innerText = char;
+            p.style.color = currentTheme === 'raven' ? '#333' : 'var(--accent)';
+            p.style.left = Math.random() * 100 + 'vw';
+            p.style.top = Math.random() * 100 + 'vh';
+            p.style.fontSize = (Math.random() * 10 + 10) + 'px';
+            p.style.opacity = Math.random() * 0.3;
+            container.appendChild(p);
+            
+            // Animação GSAP mais orgânica
+            gsap.to(p, {
+                y: `+=${(Math.random() - 0.5) * 500}`,
+                x: `+=${(Math.random() - 0.5) * 300}`,
+                rotation: Math.random() * 360,
+                duration: Math.random() * 10 + 10,
+                repeat: -1, yoyo: true, ease: "sine.inOut"
+            });
+        }
+    }
+
+    // ==========================================
+    // 3. CONTROLE DE MODAIS (Bug Corrigido)
+    // ==========================================
+    function openModal(id) {
+        const modal = document.getElementById(id);
+        modal.style.display = 'flex'; // Exibe o fundo
+    }
+    function closeModal(id) {
+        document.getElementById(id).style.display = 'none';
+    }
+
+    // ==========================================
+    // 4. ADMIN & LOGIN
+    // ==========================================
+    function handleLogin() {
+        if(document.getElementById('user').value === 'TSUO' && document.getElementById('pass').value === '171088') {
+            closeModal('loginModal');
+            openModal('adminPanel');
+            loadAdminList();
+            
+            // Carrega infos pro admin
+            document.getElementById('myPfp').value = owner.pfp;
+            document.getElementById('myDiscord').value = owner.discord;
+            document.getElementById('myBio').value = owner.bio;
+        } else {
+            const btn = document.querySelector('#loginModal button');
+            btn.innerText = "FALHA DE SEGURANÇA!";
+            btn.style.background = "red";
+            setTimeout(() => { btn.innerText = "AUTENTICAR"; btn.style.background = "var(--accent)"; }, 2000);
+        }
+    }
+
+    function savePost() {
+        const id = document.getElementById('editId').value;
+        const data = {
+            id: id ? parseInt(id) : Date.now(),
+            title: document.getElementById('pTitle').value,
+            cat: document.getElementById('pCat').value,
+            btnName: document.getElementById('pBtnName').value || 'DOWNLOAD',
+            btnLink: document.getElementById('pBtnLink').value,
+            img: document.getElementById('pImg').value,
+            desc: document.getElementById('pDesc').value,
+            note: document.getElementById('pNote').value
+        };
+
+        if(!data.title) return alert('TÍTULO OBRIGATÓRIO.');
+
+        if(id) posts[posts.findIndex(x => x.id === parseInt(id))] = data;
+        else posts.unshift(data); // Novo no topo
+
+        localStorage.setItem('tsuo_v8_posts', JSON.stringify(posts));
+        alert('DADOS INJETADOS COM SUCESSO!');
+        
+        // Reset e Recarrega
+        document.getElementById('editId').value = '';
+        document.getElementById('saveBtn').innerText = 'PUBLICAR DADOS';
+        loadAdminList();
+        renderFeed();
+    }
+
+    function saveProfile() {
+        owner.pfp = document.getElementById('myPfp').value;
+        owner.discord = document.getElementById('myDiscord').value;
+        owner.bio = document.getElementById('myBio').value;
+        localStorage.setItem('tsuo_v8_owner', JSON.stringify(owner));
+        alert('IDENTIDADE ATUALIZADA!');
+    }
+
+    function exportData() {
+        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(posts));
+        const a = document.createElement('a');
+        a.href = dataStr;
+        a.download = `tsuo_backup_${new Date().toLocaleDateString()}.json`;
+        a.click();
+    }
+
+    function loadAdminList() {
+        const list = document.getElementById('adminPostList');
+        const s = document.getElementById('adminSearch').value.toLowerCase();
+        list.innerHTML = '';
+        
+        posts.filter(p => p.title.toLowerCase().includes(s)).forEach(p => {
+            const row = document.createElement('div');
+            row.className = "flex justify-between items-center p-3 bg-black/50 rounded border border-white/5 hover:border-[var(--accent)] transition";
+            row.innerHTML = `
+                <div class="flex items-center gap-3">
+                    <span class="tag-badge ${p.cat === 'script' ? 'tag-script' : 'tag-executor'}">${p.cat.toUpperCase()}</span>
+                    <span class="text-xs font-bold space truncate max-w-[150px] text-white">${p.title}</span>
+                </div>
+                <div class="flex gap-2">
+                    <button onclick="editPost(${p.id})" class="text-blue-400 p-2 hover:bg-blue-400/20 rounded"><i data-lucide="edit" class="w-4 h-4"></i></button>
+                    <button onclick="duplicatePost(${p.id})" class="text-yellow-400 p-2 hover:bg-yellow-400/20 rounded"><i data-lucide="copy" class="w-4 h-4"></i></button>
+                    <button onclick="deletePost(${p.id})" class="text-red-500 p-2 hover:bg-red-500/20 rounded"><i data-lucide="trash" class="w-4 h-4"></i></button>
+                </div>
+            `;
+            list.appendChild(row);
+        });
+        lucide.createIcons();
+    }
+
+    function editPost(id) {
+        const p = posts.find(x => x.id === id);
+        document.getElementById('editId').value = p.id;
+        document.getElementById('pTitle').value = p.title;
+        document.getElementById('pCat').value = p.cat;
+        document.getElementById('pBtnName').value = p.btnName;
+        document.getElementById('pBtnLink').value = p.btnLink;
+        document.getElementById('pImg').value = p.img;
+        document.getElementById('pDesc').value = p.desc;
+        document.getElementById('pNote').value = p.note;
+        document.getElementById('saveBtn').innerText = 'ATUALIZAR CONTEÚDO';
+    }
+
+    function duplicatePost(id) {
+        const p = {...posts.find(x => x.id === id)};
+        p.id = Date.now();
+        p.title += " (Cópia)";
+        posts.unshift(p);
+        localStorage.setItem('tsuo_v8_posts', JSON.stringify(posts));
+        loadAdminList();
+        renderFeed();
+    }
+
+    function deletePost(id) {
+        if(confirm('PURGAR ARQUIVO PERMANENTEMENTE?')) {
+            posts = posts.filter(x => x.id !== id);
+            localStorage.setItem('tsuo_v8_posts', JSON.stringify(posts));
+            loadAdminList();
+            renderFeed();
+        }
+    }
+
+    // ==========================================
+    // 5. RENDERIZAÇÃO DO SITE E 3D TILT
+    // ==========================================
+    function renderFeed(search = "", category = "") {
+        const feed = document.getElementById('postFeed');
+        feed.innerHTML = '';
+        
+        let filtered = posts.filter(p => p.title.toLowerCase().includes(search.toLowerCase()));
+        if(category) filtered = filtered.filter(p => p.cat === category);
+
+        filtered.forEach(p => {
+            const card = document.createElement('div');
+            // Classes para o card e para a lógica do Tilt (3D)
+            card.className = "tilt-card neon-box p-6 group cursor-pointer rounded-[30px] overflow-hidden relative flex flex-col justify-between";
+            card.innerHTML = `
+                <div class="h-40 overflow-hidden mb-6 rounded-2xl relative shadow-inner">
+                    <img src="${p.img}" class="w-full h-full object-cover transition duration-700 opacity-70 group-hover:opacity-100" onerror="this.src='https://via.placeholder.com/400x200/111/fff?text=TSUO+ASSET'">
+                    <span class="absolute top-3 left-3 tag-badge ${p.cat === 'script' ? 'tag-script' : 'tag-executor'} shadow-lg">${p.cat.toUpperCase()}</span>
+                </div>
+                <div>
+                    <h3 class="syncopate text-xl font-bold mb-3 text-white group-hover:text-[var(--accent)] transition leading-tight">${p.title}</h3>
+                    <div class="flex justify-between items-center mt-6 pt-4 border-t border-white/5 opacity-50 group-hover:opacity-100 transition space text-xs text-[var(--accent)] font-bold">
+                        <span>INICIAR DOWNLOAD</span>
+                        <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                    </div>
+                </div>
+            `;
+            
+            // Lógica do Tilt 3D (Vanilla JS puro)
+            card.addEventListener('mousemove', e => {
+                const rect = card.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                const centerX = rect.width / 2;
+                const centerY = rect.height / 2;
+                const rotateX = ((y - centerY) / centerY) * -15; // Máximo 15 graus
+                const rotateY = ((x - centerX) / centerX) * 15;
+                
+                card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.02, 1.02, 1.02)`;
+                card.style.borderColor = "var(--accent)";
+            });
+            
+            card.addEventListener('mouseleave', () => {
+                card.style.transform = `perspective(1000px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)`;
+                card.style.borderColor = "rgba(255,255,255,0.1)";
+            });
+
+            card.onclick = () => viewPost(p.id);
+            feed.appendChild(card);
+        });
+        lucide.createIcons();
+    }
+
+    function viewPost(id) {
+        const p = posts.find(x => x.id === id);
+        const content = document.getElementById('postContent');
+        
+        // Fundo com blur da própria imagem do post
+        content.innerHTML = `
+            <div class="absolute inset-0 bg-cover bg-center blur-[100px] opacity-20 -z-10" style="background-image: url('${p.img}')"></div>
+            <div class="flex flex-col lg:flex-row gap-12 relative z-10">
+                <div class="lg:w-5/12 relative">
+                    <img src="${p.img}" class="w-full rounded-[20px] shadow-[0_10px_40px_rgba(0,0,0,0.8)] border border-white/10" onerror="this.src='https://via.placeholder.com/800x600/111/fff?text=TSUO+ASSET'">
+                    <span class="absolute -bottom-4 left-1/2 -translate-x-1/2 tag-badge ${p.cat === 'script' ? 'tag-script' : 'tag-executor'} text-sm px-6 py-2 border border-white/20">${p.cat.toUpperCase()}</span>
+                </div>
+                <div class="lg:w-7/12 flex flex-col justify-start pt-4">
+                    <h2 class="syncopate text-4xl md:text-5xl font-black mb-6 text-white leading-tight">${p.title}</h2>
+                    <div class="desc-text opacity-90 mb-8 text-gray-200">${p.desc}</div>
+                    
+                    ${p.note ? `
+                        <div class="bg-black/60 p-5 border-l-4 border-[var(--accent)] mb-8 flex gap-4 rounded-r-2xl backdrop-blur-md shadow-xl">
+                            <img src="${owner.pfp}" onclick="openModal('profileModal')" class="w-14 h-14 rounded-full border-2 border-[var(--accent)] cursor-pointer hover:scale-110 transition object-cover flex-shrink-0">
+                            <div>
+                                <span class="text-[10px] space text-[var(--accent)] font-bold tracking-widest uppercase">OBSERVAÇÃO DO DONO</span>
+                                <p class="space text-sm text-white opacity-90 mt-1">${p.note}</p>
+                            </div>
+                        </div>
+                    ` : ''}
+
+                    <a href="${p.btnLink}" target="_blank" class="btn-main block w-full text-center py-6 rounded-2xl text-xl syncopate shadow-lg mt-auto">${p.btnName}</a>
+                </div>
+            </div>
+        `;
+        
+        // Sincroniza o perfil pro modal
+        document.getElementById('myPfpDisplay').src = owner.pfp;
+        document.getElementById('myBioDisplay').innerText = owner.bio;
+        document.getElementById('myDiscordLink').href = owner.discord;
+        
+        openModal('postPage');
+    }
+
+    function filterCat(c) { renderFeed(document.getElementById('searchInput').value, c); }
+    document.getElementById('searchInput').oninput = (e) => renderFeed(e.target.value);
+    document.getElementById('adminSearch').oninput = loadAdminList;
+
+    // ==========================================
+    // 6. TSORA (Assistente Virtual Inteligente)
+    // ==========================================
+    const tsoraKnowledge = [
+        { keys: ["hub", "gui", "interface", "menu"], reply: "Para criar um Script Hub no Roblox, usamos o **ScreenGui**. O melhor método atual é escrever o script Luau criando as instâncias no cliente (Instance.new('Frame')), mas para economizar tempo, recomendamos usar **UI Libraries** (Bibliotecas de Interface) feitas pela comunidade, como Orion Library ou Rayfield. Quer o link para alguma delas?" },
+        { keys: ["localscript", "script", "diferença", "server", "client"], reply: "Excelente pergunta! Um **LocalScript** roda no lado do Cliente (o computador do jogador), ideal para mexer na câmera, GUIs e inputs do teclado. Já o **Script** (Server Script) roda no Servidor, então tudo que ele muda (como matar um jogador ou deletar uma peça) todos os outros jogadores conseguem ver." },
+        { keys: ["executor", "exploit", "injetor", "rodar"], reply: "Executores são programas que injetam código Lua na engine do Roblox. Atualmente (após o Byfron/Hyperion), os executores de PC estão difíceis de operar gratuitamente. Para Android, opções como Delta ou Fluxus (quando atualizados) são os mais procurados aqui na Tsuo Socials." },
+        { keys: ["bypass", "anticheat", "ban"], reply: "A Tsuo Socials recomenda sempre usar scripts em contas secundárias (alts). O Anti-Cheat do Roblox (Hyperion) rastreia injeções na memória e comportamentos anormais. Use funções de disfarce se seu executor tiver `hookfunction` ou `hookmetamethod`." },
+        { keys: ["oi", "ola", "olá", "salve", "tsora"], reply: "Saudações! Eu sou a Tsora, a IA nativa da Tsuo Socials. Como posso otimizar seu código Lua hoje?" }
+    ];
+
+    function handleTsoraMsg(e) {
+        e.preventDefault();
+        const inputStr = document.getElementById('tsoraInput').value;
+        if(!inputStr.trim()) return;
+        
+        appendTsoraMsg(inputStr, 'user');
+        document.getElementById('tsoraInput').value = '';
+
+        // Efeito "Digitando"
+        const chatBox = document.getElementById('tsoraChat');
+        const typingId = 'typing-' + Date.now();
+        chatBox.innerHTML += `<div id="${typingId}" class="tsora-msg msg-ai text-blue-400 text-xs italic">Tsora está processando...</div>`;
+        chatBox.scrollTop = chatBox.scrollHeight;
+
+        // Processa resposta
+        setTimeout(() => {
+            document.getElementById(typingId).remove();
+            let response = "Hmm, meu banco de dados não tem a resposta exata para isso. Tente me perguntar sobre: **Diferença entre Scripts**, **Como criar GUIs/Hubs**, ou sobre **Executores**.";
+            
+            const lowerInput = inputStr.toLowerCase();
+            for(let data of tsoraKnowledge) {
+                if(data.keys.some(k => lowerInput.includes(k))) {
+                    response = data.reply;
+                    break;
+                }
+            }
+            appendTsoraMsg(response, 'ai');
+        }, 800);
+    }
+
+    function appendTsoraMsg(text, type) {
+        const chat = document.getElementById('tsoraChat');
+        chat.innerHTML += `<div class="tsora-msg msg-${type} ${type === 'ai' ? 'shadow-[0_0_15px_rgba(59,130,246,0.2)]' : ''}">${text}</div>`;
+        chat.scrollTop = chat.scrollHeight;
+    }
+
+    // ==========================================
+    // 7. UTILITÁRIOS & STATUS AO VIVO
+    // ==========================================
+    // Ping/Online (Efeito Visual para engajamento)
+    setInterval(() => {
+        const p = document.getElementById('pingDisplay');
+        const mP = document.getElementById('modalPingDisplay');
+        let currentPing = parseInt(p.innerText);
+        currentPing = Math.max(10, Math.min(80, currentPing + (Math.floor(Math.random() * 9) - 4)));
+        p.innerText = currentPing;
+        if(mP) mP.innerHTML = `${currentPing} <span class="text-sm text-green-400">ms</span>`;
+
+        const u = document.getElementById('onlineUsers');
+        u.innerText = Math.max(100, parseInt(u.innerText) + (Math.floor(Math.random() * 5) - 2));
+    }, 3000);
+
+    // Speed Test Simples
+    function testNetwork() {
+        const btn = document.getElementById('testNetBtn');
+        const display = document.getElementById('speedDisplay');
+        btn.innerText = "TESTANDO...";
+        display.innerHTML = `<i data-lucide="loader-2" class="w-8 h-8 animate-spin mx-auto text-cyan-400"></i>`;
+        lucide.createIcons();
+
+        // Usa a API de conexão do navegador se disponível, se não, faz math random pra simular
+        setTimeout(() => {
+            let speed = "50.5";
+            if (navigator.connection && navigator.connection.downlink) {
+                speed = navigator.connection.downlink.toFixed(1); // Retorna Mbps aproximado
+            } else {
+                speed = (Math.random() * 100 + 20).toFixed(1);
+            }
+            display.innerHTML = `${speed} <span class="text-sm text-gray-400">Mbps</span>`;
+            btn.innerText = "TESTE CONCLUÍDO";
+            
+            // Pega OS
+            const platform = navigator.userAgent;
+            let os = "Desconhecido";
+            if (platform.includes("Win")) os = "Windows OS";
+            if (platform.includes("Mac")) os = "MacOS";
+            if (platform.includes("Android")) os = "Android OS";
+            if (platform.includes("iPhone")) os = "iOS";
+            document.getElementById('osDisplay').innerText = os;
+
+            setTimeout(() => { btn.innerText = "RETESTAR REDE"; }, 3000);
+        }, 2000);
+    }
+
+    // ==========================================
+    // 8. BOOT INICIAL DO SISTEMA
+    // ==========================================
+    window.onload = () => {
+        // Letras Magnéticas no Logo
+        const logo = document.getElementById('logoText');
+        logo.innerHTML = logo.innerText.split('').map(c => `<span class="char-anim">${c}</span>`).join('');
+        
+        // Inicia Tema, Feed e Ícones
+        setTheme(currentTheme);
+        renderFeed();
+        lucide.createIcons();
+    };
+</script>
+
+</body>
+</html>
