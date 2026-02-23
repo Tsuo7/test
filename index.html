@@ -1,99 +1,65 @@
 <!DOCTYPE html>
-<html lang="pt-br" class="dark">
+<html lang="ja">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title id="meta-title">TSUO INDUSTRIES | TITAN EDITION V18.4</title>
+    <title id="meta-title">TSUO ANIME | 日本のプラットフォーム</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/howler/2.2.3/howler.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Outfit:wght@300;600;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;500;900&family=Outfit:wght@300;600;800&display=swap" rel="stylesheet">
 
     <style>
         :root {
-            --p-accent: #bc13fe;
-            --p-glow: rgba(188, 19, 254, 0.6);
-            --p-bg: #020204;
-            --p-surface: #0a0a0e;
+            --p-accent: #e11d48; /* Crimson Japan */
+            --p-bg: #f8f9fa;
+            --p-card: #ffffff;
+            --p-text: #1a1a1a;
         }
 
-        /* Temas de Alta Voltagem */
-        .theme-blood { --p-accent: #ff003c; --p-glow: rgba(255, 0, 60, 0.6); }
-        .theme-emerald { --p-accent: #00ff88; --p-glow: rgba(0, 255, 136, 0.6); }
-        .theme-cyber { --p-accent: #00e5ff; --p-glow: rgba(0, 229, 255, 0.6); }
+        /* Temas */
+        .theme-dark { --p-bg: #0a0a0b; --p-card: #141415; --p-text: #f0f0f0; --p-accent: #ff4d4d; }
+        .theme-matcha { --p-bg: #f2f4f2; --p-card: #ffffff; --p-text: #2d3e2d; --p-accent: #5d8233; }
+        .theme-midnight { --p-bg: #020617; --p-card: #0f172a; --p-text: #f8fafc; --p-accent: #38bdf8; }
 
-        body, html {
-            margin: 0; padding: 0;
-            background-color: var(--p-bg);
-            color: #ffffff;
-            font-family: 'Outfit', sans-serif;
-            overflow-x: hidden;
-            height: 100%;
+        body { 
+            background-color: var(--p-bg); 
+            color: var(--p-text); 
+            font-family: 'Outfit', 'Noto Sans JP', sans-serif;
+            transition: all 0.4s ease;
         }
 
-        .mono { font-family: 'JetBrains Mono', monospace; }
-
-        /* Background 3D Canvas */
-        #canvas-3d {
-            position: fixed; top: 0; left: 0; z-index: -2;
-            width: 100%; height: 100%; pointer-events: none;
+        .jp-text { font-family: 'Noto Sans JP', sans-serif; writing-mode: vertical-rl; }
+        
+        .glass-nav {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(15px);
+            border-bottom: 1px solid rgba(0,0,0,0.05);
         }
+        .theme-dark .glass-nav { background: rgba(10, 10, 11, 0.8); border-bottom: 1px solid rgba(255,255,255,0.05); }
 
-        /* Overlay de Scanlines Dinâmico */
-        .overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.1) 50%),
-                        linear-gradient(90deg, rgba(255, 0, 0, 0.03), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.03));
-            z-index: 100; background-size: 100% 3px, 3px 100%;
-            pointer-events: none; opacity: 0.4;
+        .anime-card {
+            transition: all 0.5s cubic-bezier(0.165, 0.84, 0.44, 1);
+            cursor: pointer;
         }
+        .anime-card:hover { transform: scale(1.03); }
+        .anime-card:hover .play-overlay { opacity: 1; }
 
-        /* Glassmorphism Ultra */
-        .glass {
-            background: rgba(10, 10, 15, 0.7);
-            backdrop-filter: blur(30px) saturate(150%);
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8);
-        }
-
-        /* Botão Massive 3D */
-        .btn-elite {
-            position: relative; overflow: hidden;
-            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            border: 1px solid var(--p-accent);
-        }
-        .btn-elite:hover {
-            transform: scale(1.05) translateY(-5px);
-            box-shadow: 0 0 40px var(--p-glow);
-            background: var(--p-accent);
-            color: white;
+        .tag-pill {
+            padding: 2px 10px;
+            border-radius: 4px;
+            font-size: 10px;
+            font-weight: 800;
+            text-transform: uppercase;
         }
 
-        /* Cards de Asset */
-        .asset-card {
-            transform-style: preserve-3d;
-            transition: transform 0.6s cubic-bezier(0.23, 1, 0.32, 1);
-        }
-        .asset-card:hover {
-            transform: rotateY(10deg) rotateX(5deg) translateY(-10px);
-        }
-
-        /* Animação de Glitch */
-        .glitch-text { animation: glitch 3s infinite; }
-        @keyframes glitch {
-            0% { text-shadow: 2px 0 red, -2px 0 blue; }
-            5% { text-shadow: -2px 0 red, 2px 0 blue; }
-            10% { text-shadow: 2px 0 red, -2px 0 blue; }
-            11% { text-shadow: none; }
-        }
-
-        /* IA Terminal Scroll */
-        #aiHistory::-webkit-scrollbar { width: 4px; }
-        #aiHistory::-webkit-scrollbar-thumb { background: var(--p-accent); border-radius: 10px; }
+        /* Modal Player */
+        #video-modal { background: rgba(0,0,0,0.95); backdrop-filter: blur(10px); }
+        
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-thumb { background: var(--p-accent); border-radius: 10px; }
 
         .tab-content { display: none; }
         .tab-content.active { display: block; }
@@ -101,174 +67,166 @@
 </head>
 <body>
 
-<canvas id="canvas-3d"></canvas>
-<div class="overlay"></div>
-
-<div id="entry-popup" class="fixed inset-0 z-[2000] hidden items-center justify-center bg-black/90 backdrop-blur-3xl">
-    <div id="popup-card" class="glass max-w-2xl w-full p-16 rounded-[40px] text-center border-[var(--p-accent)]/50 relative overflow-hidden">
-        <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-[var(--p-accent)] to-transparent animate-pulse"></div>
-        
-        <div class="mb-8 inline-block p-6 bg-[var(--p-accent)]/10 rounded-full">
-            <i data-lucide="shield-check" class="w-16 h-16 text-[var(--p-accent)]"></i>
+<nav class="fixed top-0 w-full z-[100] glass-nav px-8 py-5">
+    <div class="max-w-7xl mx-auto flex justify-between items-center">
+        <div class="flex items-center gap-12">
+            <div class="flex items-center gap-3">
+                <div id="site-logo" class="w-10 h-10 bg-[var(--p-accent)] text-white flex items-center justify-center rounded-lg font-black text-xl">T</div>
+                <h1 id="site-name" class="text-2xl font-black italic tracking-tighter uppercase">TSUO <span class="text-[var(--p-accent)]">ANIME</span></h1>
+            </div>
+            
+            <div class="hidden md:flex gap-8 text-[11px] font-bold uppercase tracking-widest opacity-70">
+                <a href="#" onclick="showSection('home')" class="hover:text-[var(--p-accent)] transition">Início</a>
+                <a href="#" onclick="showSection('ranks')" class="hover:text-[var(--p-accent)] transition">Rankings</a>
+                <a href="#" onclick="showSection('categories')" class="hover:text-[var(--p-accent)] transition">Categorias</a>
+                <a href="#" onclick="showSection('about')" class="hover:text-[var(--p-accent)] transition">Sobre</a>
+            </div>
         </div>
-        
-        <h2 class="text-6xl font-black uppercase italic tracking-tighter mb-4 glitch-text">
-            GRUPO <span class="text-[var(--p-accent)]">SORTEIOS</span>
-        </h2>
-        <p class="mono text-xs text-gray-400 mb-12 tracking-[0.5em] uppercase">> ACESSO À DATABASE DE ELITE LIBERADO</p>
-        
-        <a id="popup-link" href="#" target="_blank" onmouseenter="playSound('hover')" onclick="playSound('click')" class="block w-full py-8 bg-[var(--p-accent)] text-white font-black rounded-2xl text-3xl shadow-[0_0_50px_var(--p-glow)] hover:scale-105 transition-all uppercase italic">
-            Entrar no Grupo
-        </a>
-        
-        <button onclick="closePopup()" class="mt-8 text-[10px] mono text-gray-700 hover:text-white transition tracking-widest">[ FECHAR_PROTOCOLO_X ]</button>
-    </div>
-</div>
 
-<nav class="fixed top-0 w-full z-[1000] glass border-b border-white/5 px-10 py-6">
-    <div class="max-w-screen-2xl mx-auto flex justify-between items-center">
         <div class="flex items-center gap-6">
-            <div id="site-logo" class="w-14 h-14 bg-[var(--p-accent)] flex items-center justify-center font-black text-2xl rounded-xl shadow-[0_0_30px_var(--p-glow)]">T</div>
-            <div>
-                <h1 id="site-name" class="text-2xl font-black uppercase italic tracking-tighter">TSUO <span class="text-[var(--p-accent)]">INDUSTRIES</span></h1>
-                <div class="flex gap-4 mono text-[8px] text-gray-500 uppercase tracking-widest mt-1">
-                    <span>Status: <span class="text-green-500">Online</span></span>
-                    <span>Version: 18.4.2</span>
-                    <span id="real-time">00:00:00</span>
-                </div>
+            <div class="relative hidden sm:block">
+                <input type="text" id="main-search" oninput="liveSearch(this.value)" placeholder="Buscar anime..." class="bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 rounded-full py-2 px-6 text-xs w-64 outline-none focus:border-[var(--p-accent)] transition">
+                <i data-lucide="search" class="absolute right-4 top-2 w-4 h-4 opacity-40"></i>
+                <div id="search-results" class="absolute top-12 left-0 w-full glass-nav rounded-2xl hidden overflow-hidden shadow-2xl border border-black/5"></div>
             </div>
-        </div>
-
-        <div class="hidden xl:flex items-center gap-12">
-            <div class="flex flex-col items-end mono text-[10px]">
-                <span id="user-ip" class="text-[var(--p-accent)] font-bold">IP: 0.0.0.0</span>
-                <span id="user-loc" class="text-gray-500 italic">LOCALIZING...</span>
-            </div>
-            <button onclick="openModal('loginModal')" class="btn-elite px-8 py-3 rounded-lg mono text-[10px] uppercase font-bold tracking-widest">Acessar Terminal</button>
+            <button onclick="openAdmin()" class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-black/5 transition"><i data-lucide="user-cog" class="w-5 h-5"></i></button>
         </div>
     </div>
 </nav>
 
-<main class="relative pt-60 pb-20 px-10 max-w-screen-2xl mx-auto">
-    <div class="grid lg:grid-cols-2 gap-24 items-center">
-        <div class="z-10">
-            <div class="inline-flex items-center gap-4 px-4 py-2 glass rounded-full mb-8 border-[var(--p-accent)]/20">
-                <span class="w-2 h-2 bg-[var(--p-accent)] rounded-full animate-ping"></span>
-                <span class="mono text-[10px] uppercase text-[var(--p-accent)] font-bold tracking-widest">Cybernet Connection Established</span>
-            </div>
-            <h2 class="text-[100px] md:text-[150px] font-black uppercase italic leading-[0.75] tracking-tighter mb-12">
-                TECH <br> <span class="text-transparent bg-clip-text bg-gradient-to-r from-white to-white/5">ABYSS</span>
-            </h2>
-            
-            <div class="flex flex-wrap gap-6">
-                <button onclick="renderFeed('todos')" class="btn-elite px-10 py-5 bg-white text-black font-black text-xs uppercase italic rounded-sm">Todos_Arquivos</button>
-                <button onclick="renderFeed('script')" class="btn-elite px-10 py-5 glass mono text-xs uppercase rounded-sm">Scripts_Luau</button>
-                <button onclick="renderFeed('executor')" class="btn-elite px-10 py-5 glass mono text-xs uppercase rounded-sm">Executores_V7</button>
-            </div>
+<main id="section-home" class="pt-32 px-8 max-w-7xl mx-auto min-h-screen">
+    <div id="hero-featured" class="w-full h-[500px] rounded-[40px] mb-20 overflow-hidden relative shadow-2xl">
         </div>
 
-        <div class="hidden lg:block">
-            <div class="glass p-10 rounded-[30px] border-l-8 border-[var(--p-accent)] relative overflow-hidden">
-                <div class="flex justify-between items-center mb-8">
-                    <h4 class="mono text-xs font-black uppercase text-gray-400 tracking-widest">System_Live_Telemetry</h4>
-                    <div class="flex gap-2">
-                        <div class="w-2 h-2 bg-red-500 rounded-full"></div>
-                        <div class="w-2 h-2 bg-yellow-500 rounded-full"></div>
-                        <div class="w-2 h-2 bg-green-500 rounded-full"></div>
-                    </div>
-                </div>
-                <div id="system-logs" class="h-60 overflow-hidden mono text-[10px] text-[var(--p-accent)]/70 space-y-2">
-                    </div>
-            </div>
-        </div>
+    <div class="flex gap-4 mb-12 overflow-x-auto pb-4 no-scrollbar" id="home-tag-filters">
+        <button onclick="filterByTag('all')" class="px-6 py-2 bg-[var(--p-accent)] text-white text-[10px] font-bold uppercase rounded-full">Todos</button>
     </div>
 
-    <div id="postFeed" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-10 mt-40 pb-40">
+    <h2 class="text-4xl font-black mb-10 italic uppercase">Lançamentos <span class="text-[var(--p-accent)]">Recentes</span></h2>
+    <div id="anime-grid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-8 pb-40">
         </div>
 </main>
 
-<div id="adminPanel" class="fixed inset-0 z-[3000] hidden bg-[#010102] overflow-hidden">
-    <div class="flex h-full">
-        <aside class="w-72 border-r border-white/5 bg-[#050507] p-8 flex flex-col">
-            <div class="mb-12">
-                <h3 class="text-xl font-black italic uppercase">Tsuo <span class="text-[var(--p-accent)]">Core</span></h3>
-                <p class="text-[8px] mono text-gray-600 uppercase">Master Admin Interface</p>
-            </div>
-            
-            <nav class="flex-grow space-y-2">
-                <button onclick="switchTab('tab-dash')" class="w-full text-left p-4 rounded-xl mono text-xs uppercase hover:bg-white/5 transition flex items-center gap-4"><i data-lucide="layout-dashboard" class="w-4 h-4"></i> Dashboard</button>
-                <button onclick="switchTab('tab-assets')" class="w-full text-left p-4 rounded-xl mono text-xs uppercase hover:bg-white/5 transition flex items-center gap-4"><i data-lucide="database" class="w-4 h-4"></i> Gerenciar Assets</button>
-                <button onclick="switchTab('tab-config')" class="w-full text-left p-4 rounded-xl mono text-xs uppercase hover:bg-white/5 transition flex items-center gap-4"><i data-lucide="settings" class="w-4 h-4"></i> Config Site</button>
-                <button onclick="switchTab('tab-security')" class="w-full text-left p-4 rounded-xl mono text-xs uppercase hover:bg-white/5 transition flex items-center gap-4"><i data-lucide="shield-alert" class="w-4 h-4"></i> Segurança</button>
-            </nav>
+<main id="section-ranks" class="hidden pt-32 px-8 max-w-5xl mx-auto min-h-screen">
+    <h2 class="text-6xl font-black mb-4 uppercase italic">Top <span class="text-[var(--p-accent)]">10</span></h2>
+    <p class="text-gray-500 mono text-xs mb-16 uppercase tracking-[0.3em]">Os mais assistidos da temporada</p>
+    
+    <div id="rank-list" class="space-y-6 pb-40">
+        </div>
+</main>
 
-            <button onclick="location.reload()" class="p-4 bg-red-600/10 text-red-500 rounded-xl mono text-[10px] font-bold uppercase italic">Finalizar Sessão</button>
+<main id="section-categories" class="hidden pt-32 px-8 max-w-7xl mx-auto min-h-screen">
+    <h2 class="text-4xl font-black mb-12 uppercase italic">Explorar por <span class="text-[var(--p-accent)]">Gênero</span></h2>
+    <div id="category-cloud" class="grid grid-cols-2 md:grid-cols-4 gap-6">
+        </div>
+</main>
+
+<main id="section-about" class="hidden pt-32 px-8 max-w-3xl mx-auto min-h-screen text-center">
+    <div class="w-32 h-32 bg-[var(--p-accent)] rounded-full mx-auto mb-10 flex items-center justify-center text-white text-5xl font-black">T</div>
+    <h2 class="text-4xl font-black mb-6 uppercase">Sobre o Criador</h2>
+    <div id="about-content" class="text-gray-500 leading-relaxed space-y-4">
+        </div>
+</main>
+
+<div id="video-modal" class="fixed inset-0 z-[1000] hidden items-center justify-center p-6">
+    <div class="w-full max-w-6xl flex flex-col lg:flex-row h-[85vh] glass-nav rounded-[40px] overflow-hidden shadow-2xl">
+        <div class="flex-grow bg-black relative">
+            <video id="main-player" controls class="w-full h-full object-contain"></video>
+            <button onclick="closePlayer()" class="absolute top-6 right-6 w-12 h-12 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center text-white backdrop-blur-md transition"><i data-lucide="x"></i></button>
+        </div>
+        <div class="w-full lg:w-96 p-10 overflow-y-auto">
+            <h3 id="player-title" class="text-3xl font-black uppercase italic mb-4">Nome do Anime</h3>
+            <div id="player-tags" class="flex flex-wrap gap-2 mb-6"></div>
+            <p id="player-desc" class="text-gray-500 text-sm leading-relaxed mb-10">Descrição...</p>
+            <div class="p-6 border border-black/5 dark:border-white/5 rounded-3xl">
+                <h4 class="text-[10px] font-black uppercase tracking-widest mb-4 opacity-50">Sugeridos</h4>
+                <div id="suggested-list" class="space-y-4"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="adminPanel" class="fixed inset-0 z-[2000] hidden bg-[#f8f9fa] dark:bg-[#0a0a0b] overflow-hidden">
+    <div class="flex h-full">
+        <aside class="w-80 bg-white dark:bg-[#111112] border-r border-black/5 dark:border-white/5 p-10 flex flex-col">
+            <div class="mb-12">
+                <h2 class="text-2xl font-black uppercase italic">Admin <span class="text-[var(--p-accent)]">Panel</span></h2>
+                <p class="text-[9px] mono opacity-50 uppercase tracking-widest mt-1">Nihon Engine V1.0</p>
+            </div>
+            <nav class="flex-grow space-y-3">
+                <button onclick="switchTab('adm-videos')" class="w-full text-left p-4 rounded-2xl hover:bg-[var(--p-accent)] hover:text-white transition font-bold text-xs uppercase flex items-center gap-4"><i data-lucide="play-circle" class="w-4 h-4"></i> Vídeos</button>
+                <button onclick="switchTab('adm-tags')" class="w-full text-left p-4 rounded-2xl hover:bg-[var(--p-accent)] hover:text-white transition font-bold text-xs uppercase flex items-center gap-4"><i data-lucide="tag" class="w-4 h-4"></i> Tags & Gêneros</button>
+                <button onclick="switchTab('adm-ranks')" class="w-full text-left p-4 rounded-2xl hover:bg-[var(--p-accent)] hover:text-white transition font-bold text-xs uppercase flex items-center gap-4"><i data-lucide="award" class="w-4 h-4"></i> Rankings</button>
+                <button onclick="switchTab('adm-site')" class="w-full text-left p-4 rounded-2xl hover:bg-[var(--p-accent)] hover:text-white transition font-bold text-xs uppercase flex items-center gap-4"><i data-lucide="settings" class="w-4 h-4"></i> Config Site</button>
+            </nav>
+            <button onclick="location.reload()" class="p-4 bg-black text-white dark:bg-white dark:text-black rounded-2xl font-black text-[10px] uppercase">Sair do Painel</button>
         </aside>
 
-        <main class="flex-grow p-16 overflow-y-auto bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')]">
+        <main class="flex-grow p-20 overflow-y-auto">
             
-            <div id="tab-dash" class="tab-content active space-y-12">
-                <div class="grid grid-cols-4 gap-8">
-                    <div class="glass p-8 rounded-2xl border-b-4 border-blue-500">
-                        <p class="mono text-[10px] text-gray-500 uppercase">Total_Visits</p>
-                        <h4 class="text-4xl font-black mt-2">128.492</h4>
-                    </div>
-                    <div class="glass p-8 rounded-2xl border-b-4 border-[var(--p-accent)]">
-                        <p class="mono text-[10px] text-gray-500 uppercase">Active_Nodes</p>
-                        <h4 class="text-4xl font-black mt-2">1.042</h4>
-                    </div>
-                    <div class="glass p-8 rounded-2xl border-b-4 border-green-500">
-                        <p class="mono text-[10px] text-gray-500 uppercase">Downloads</p>
-                        <h4 class="text-4xl font-black mt-2">89.201</h4>
-                    </div>
-                    <div class="glass p-8 rounded-2xl border-b-4 border-red-500">
-                        <p class="mono text-[10px] text-gray-500 uppercase">Threats_Blocked</p>
-                        <h4 class="text-4xl font-black mt-2">432</h4>
-                    </div>
-                </div>
-                <div class="glass p-10 rounded-3xl h-96">
-                    <canvas id="trafficChart"></canvas>
-                </div>
-            </div>
-
-            <div id="tab-assets" class="tab-content space-y-8">
-                <div class="grid lg:grid-cols-2 gap-10">
-                    <div class="glass p-10 rounded-3xl space-y-6">
-                        <h3 class="text-2xl font-black uppercase italic">Injetar Novo Asset</h3>
-                        <input type="hidden" id="asset-id">
-                        <input type="text" id="asset-title" placeholder="TÍTULO DO PAYLOAD" class="w-full bg-black/50 border border-white/10 p-4 mono text-xs rounded-lg outline-none focus:border-[var(--p-accent)]">
+            <div id="adm-videos" class="tab-content active">
+                <div class="grid lg:grid-cols-2 gap-16">
+                    <div class="space-y-6">
+                        <h3 class="text-3xl font-black italic uppercase">Postar <span class="text-[var(--p-accent)]">Vídeo</span></h3>
+                        <input type="hidden" id="edit-id">
+                        <input type="text" id="v-title" placeholder="Título do Anime" class="w-full p-5 rounded-2xl bg-black/5 dark:bg-white/5 border-none outline-none focus:ring-2 ring-[var(--p-accent)]">
                         <div class="grid grid-cols-2 gap-4">
-                            <select id="asset-cat" class="bg-black/50 border border-white/10 p-4 mono text-xs rounded-lg text-white">
-                                <option value="script">SCRIPT_LUAU</option>
-                                <option value="executor">EXECUTOR_V7</option>
-                            </select>
-                            <input type="text" id="asset-img" placeholder="URL IMAGEM" class="bg-black/50 border border-white/10 p-4 mono text-xs rounded-lg">
+                            <input type="text" id="v-thumb" placeholder="URL da Thumbnail" class="w-full p-5 rounded-2xl bg-black/5 dark:bg-white/5 border-none">
+                            <input type="text" id="v-url" placeholder="URL do Vídeo (.mp4/Direct)" class="w-full p-5 rounded-2xl bg-black/5 dark:bg-white/5 border-none">
                         </div>
-                        <input type="text" id="asset-link" placeholder="LINK DE DOWNLOAD (MEDIAFIRE/MEGA)" class="w-full bg-black/50 border border-white/10 p-4 mono text-xs rounded-lg">
-                        <textarea id="asset-desc" placeholder="DESCRIÇÃO TÉCNICA E CHANGELOG..." class="w-full bg-black/50 border border-white/10 p-4 mono text-xs rounded-lg h-32"></textarea>
-                        <button onclick="saveAsset()" class="w-full py-5 bg-[var(--p-accent)] text-white font-black rounded-xl uppercase italic shadow-2xl">Publicar Asset na Rede</button>
+                        <textarea id="v-desc" placeholder="Sinopse/Descrição..." class="w-full p-5 rounded-2xl bg-black/5 dark:bg-white/5 border-none h-40"></textarea>
+                        
+                        <div class="p-6 bg-black/5 dark:bg-white/5 rounded-3xl">
+                            <h4 class="text-[10px] font-black uppercase tracking-widest mb-4">Selecionar Tags</h4>
+                            <div id="tag-selector-list" class="flex flex-wrap gap-3"></div>
+                        </div>
+                        
+                        <button onclick="saveVideo()" class="w-full py-6 bg-[var(--p-accent)] text-white font-black rounded-3xl uppercase italic shadow-xl">Salvar Anime na Base</button>
                     </div>
-                    <div class="glass p-10 rounded-3xl overflow-y-auto max-h-[700px]">
-                        <h3 class="text-xl font-bold uppercase mb-6 mono">Database_Entries</h3>
-                        <div id="admin-list" class="space-y-3"></div>
+                    <div class="bg-black/5 dark:bg-white/5 rounded-[40px] p-10 overflow-y-auto max-h-[800px]">
+                        <h4 class="text-xl font-bold mb-8">Lista de Conteúdo</h4>
+                        <div id="adm-video-list" class="space-y-4"></div>
                     </div>
                 </div>
             </div>
 
-            <div id="tab-config" class="tab-content">
-                <div class="max-w-2xl glass p-10 rounded-3xl space-y-8">
-                    <h3 class="text-3xl font-black uppercase italic">Site_Customization</h3>
-                    <div class="space-y-4">
-                        <input type="text" id="cfg-name" placeholder="Nome da Marca" class="w-full bg-black/50 border border-white/10 p-4 mono text-xs rounded-lg">
-                        <input type="text" id="cfg-logo" placeholder="Logo (1 Char)" maxlength="1" class="w-full bg-black/50 border border-white/10 p-4 mono text-xs rounded-lg text-center">
-                        <input type="text" id="cfg-popup" placeholder="Link Grupo Sorteio" class="w-full bg-black/50 border border-white/10 p-4 mono text-xs rounded-lg">
-                        <select id="cfg-theme" onchange="applyTheme(this.value)" class="w-full bg-black/50 border border-white/10 p-4 mono text-xs rounded-lg text-white">
-                            <option value="default">NEXUS_PURPLE</option>
-                            <option value="theme-blood">DEEP_BLOOD</option>
-                            <option value="theme-emerald">CYBER_EMERALD</option>
-                            <option value="theme-cyber">NEON_CYBER</option>
+            <div id="adm-tags" class="tab-content">
+                <div class="max-w-xl space-y-8">
+                    <h3 class="text-3xl font-black italic uppercase">Gerenciar <span class="text-[var(--p-accent)]">Tags</span></h3>
+                    <div class="flex gap-4">
+                        <input type="text" id="t-name" placeholder="Nome da Tag (ex: Ação)" class="flex-grow p-5 rounded-2xl bg-black/5 border-none">
+                        <input type="color" id="t-color" class="w-20 h-16 rounded-2xl border-none p-1 cursor-pointer">
+                        <button onclick="saveTag()" class="px-10 bg-[var(--p-accent)] text-white font-black rounded-2xl uppercase">Criar</button>
+                    </div>
+                    <div id="adm-tag-list" class="grid grid-cols-2 gap-4"></div>
+                </div>
+            </div>
+
+            <div id="adm-ranks" class="tab-content">
+                <h3 class="text-3xl font-black italic uppercase mb-10">Definir <span class="text-[var(--p-accent)]">Top 10</span></h3>
+                <div class="grid lg:grid-cols-2 gap-10">
+                    <div id="rank-slots" class="space-y-4">
+                        </div>
+                    <div class="p-10 bg-black/5 rounded-[40px]">
+                        <p class="text-sm text-gray-500 mb-6">Arraste o ID do anime ou digite o ID nos slots ao lado para rankear.</p>
+                        <div id="adm-rank-ref" class="space-y-2"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="adm-site" class="tab-content">
+                <div class="max-w-2xl space-y-12">
+                    <h3 class="text-3xl font-black italic uppercase">Site <span class="text-[var(--p-accent)]">Settings</span></h3>
+                    <div class="space-y-6">
+                        <input type="text" id="cfg-name" placeholder="Nome do Site" class="w-full p-5 rounded-2xl bg-black/5 border-none">
+                        <textarea id="cfg-about" placeholder="Texto da aba Sobre Mim..." class="w-full p-5 rounded-2xl bg-black/5 border-none h-40"></textarea>
+                        <select id="cfg-theme" onchange="applyTheme(this.value)" class="w-full p-5 rounded-2xl bg-black/5 border-none outline-none">
+                            <option value="default">Sakura Clean (White)</option>
+                            <option value="theme-dark">Midnight Shinobi (Dark)</option>
+                            <option value="theme-matcha">Kyoto Garden (Green)</option>
+                            <option value="theme-midnight">Deep Blue (Cyber)</option>
                         </select>
-                        <button onclick="saveConfig()" class="w-full py-5 bg-white text-black font-black uppercase rounded-lg">Salvar Configurações</button>
+                        <button onclick="saveSiteConfig()" class="w-full py-6 bg-black text-white font-black rounded-2xl uppercase">Atualizar Plataforma</button>
                     </div>
                 </div>
             </div>
@@ -277,298 +235,291 @@
     </div>
 </div>
 
-<div id="aiModal" class="fixed inset-0 z-[4000] hidden items-center justify-center p-6 bg-black/95">
-    <div class="w-full max-w-6xl h-[85vh] glass rounded-[40px] flex overflow-hidden border-[var(--p-accent)]/20 shadow-2xl">
-        <div class="w-1/3 border-r border-white/5 p-10 flex flex-col justify-between bg-black/40">
-            <div>
-                <h4 class="text-3xl font-black uppercase italic italic mb-2">Tsuo <span class="text-[var(--p-accent)]">AI</span></h4>
-                <p class="mono text-[10px] text-gray-500 uppercase tracking-widest">Neural_Module_v18.4</p>
-                <div class="mt-10 space-y-4">
-                    <div class="p-4 glass rounded-xl mono text-[9px] text-[var(--p-accent)] uppercase">Status: Ativo</div>
-                    <div class="p-4 glass rounded-xl mono text-[9px] text-gray-400 uppercase">Capacidade: Deep Luau Learning</div>
-                </div>
-            </div>
-            <button onclick="closeModal('aiModal')" class="w-full py-4 border border-white/10 rounded-xl mono text-[10px] uppercase">Encerrar Interface</button>
-        </div>
-        <div class="flex-grow flex flex-col">
-            <div id="aiHistory" class="flex-grow p-12 overflow-y-auto mono text-sm space-y-6">
-                <div class="p-6 bg-white/5 border-l-4 border-[var(--p-accent)] rounded-r-xl">
-                    > Conexão Neural Estabelecida. Sou a Tsuo IA V18. <br>
-                    Posso gerar scripts de bypass, explicar funções de metatables e otimizar seu código Luau. O que deseja protocolar?
-                </div>
-            </div>
-            <form onsubmit="handleAI(event)" class="p-10 bg-black/60 border-t border-white/5 flex gap-6">
-                <input type="text" id="aiInput" class="flex-grow bg-transparent border-b-2 border-white/10 p-4 mono text-sm outline-none focus:border-[var(--p-accent)] transition-all" placeholder="Digite seu comando ou dúvida técnica...">
-                <button class="w-16 h-16 bg-[var(--p-accent)] rounded-full flex items-center justify-center shadow-xl hover:scale-110 transition">
-                    <i data-lucide="send" class="text-white"></i>
-                </button>
-            </form>
-        </div>
-    </div>
-</div>
-
-<button onclick="openModal('aiModal')" class="fixed bottom-12 right-12 w-24 h-24 bg-[var(--p-accent)] rounded-full flex items-center justify-center shadow-[0_0_60px_var(--p-glow)] hover:scale-110 transition-all z-[1000] group">
-    <i data-lucide="brain-circuit" class="w-10 h-10 text-white"></i>
-</button>
-
-<div id="loginModal" class="fixed inset-0 z-[5000] hidden items-center justify-center bg-black/98 backdrop-blur-3xl">
-    <div class="w-full max-w-sm p-12 glass rounded-[30px] text-center border-[var(--p-accent)]/30">
-        <h3 class="text-3xl font-black uppercase mb-10 italic">Terminal_Auth</h3>
-        <input type="password" id="admin-pass" placeholder="MASTER_KEY" class="w-full bg-black border border-white/10 p-5 mb-8 mono text-xs text-center rounded-xl outline-none focus:border-[var(--p-accent)]">
-        <button onclick="authAdmin()" class="w-full bg-[var(--p-accent)] py-5 font-black uppercase italic rounded-xl shadow-2xl">Acessar Core</button>
+<div id="loginModal" class="fixed inset-0 z-[5000] hidden items-center justify-center bg-white/95 dark:bg-black/95 backdrop-blur-xl">
+    <div class="w-full max-w-sm p-12 text-center">
+        <h3 class="text-4xl font-black uppercase italic mb-10">Master <span class="text-[var(--p-accent)]">Key</span></h3>
+        <input type="password" id="adm-pass" placeholder="CHAVE DE ACESSO" class="w-full p-6 bg-black/5 dark:bg-white/5 border-none rounded-3xl text-center font-bold tracking-[1em] outline-none focus:ring-2 ring-[var(--p-accent)] mb-8">
+        <button onclick="checkAuth()" class="w-full py-6 bg-[var(--p-accent)] text-white font-black rounded-3xl uppercase shadow-2xl">Acessar Admin</button>
     </div>
 </div>
 
 <script>
-    // --- ENGINE DE SOM (HOWLER) ---
-    const sounds = {
-        hover: new Howl({ src: ['https://assets.mixkit.co/active_storage/sfx/2568/2568-preview.mp3'], volume: 0.1 }),
-        click: new Howl({ src: ['https://assets.mixkit.co/active_storage/sfx/2571/2571-preview.mp3'], volume: 0.3 }),
-        granted: new Howl({ src: ['https://assets.mixkit.co/active_storage/sfx/2570/2570-preview.mp3'], volume: 0.5 })
-    };
-    function playSound(type) { sounds[type].play(); }
-
-    // --- DATABASE & CONFIG ---
-    let db = JSON.parse(localStorage.getItem('tsuo_titan_db')) || [];
-    let config = JSON.parse(localStorage.getItem('tsuo_titan_cfg')) || {
-        name: 'TSUO INDUSTRIES', logo: 'T', popup: 'https://discord.gg', theme: 'default'
+    // --- DATABASE ---
+    let db = JSON.parse(localStorage.getItem('tsuo_anime_db')) || {
+        videos: [],
+        tags: [{id: 1, name: 'Ação', color: '#ff4d4d'}, {id: 2, name: 'Aventura', color: '#38bdf8'}],
+        ranks: [],
+        config: { name: 'TSUO ANIME', theme: 'default', about: 'Bem-vindo ao portal definitivo de animes da TSUO Industries.' }
     };
 
-    // --- THREE.JS BACKGROUND (PARTÍCULAS) ---
-    const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-    const renderer = new THREE.WebGLRenderer({ canvas: document.getElementById('canvas-3d'), alpha: true });
-    renderer.setSize(window.innerWidth, window.innerHeight);
-
-    const particlesGeometry = new THREE.BufferGeometry();
-    const count = 3000;
-    const positions = new Float32Array(count * 3);
-    for(let i=0; i<count*3; i++) positions[i] = (Math.random() - 0.5) * 10;
-    particlesGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-    const particlesMaterial = new THREE.PointsMaterial({ size: 0.005, color: 0xbc13fe, transparent: true, opacity: 0.5 });
-    const particlesMesh = new THREE.Points(particlesGeometry, particlesMaterial);
-    scene.add(particlesMesh);
-    camera.position.z = 3;
-
-    function animate3D() {
-        requestAnimationFrame(animate3D);
-        particlesMesh.rotation.y += 0.001;
-        particlesMesh.rotation.x += 0.0005;
-        renderer.render(scene, camera);
-    }
-    animate3D();
-
-    // --- TSUO IA NEURAL ---
-    const knowledge = {
-        "metatable": "Metatables são tabelas que permitem mudar o comportamento de outras tabelas. Use 'setmetatable(obj, mt)' para hooks poderosos.",
-        "hook": "Hooking é interceptar funções. Em Luau, usamos 'hookfunction' ou 'hookmetamethod' para enganar o Anti-Cheat.",
-        "bypass": "Para bypassar detecções de velocidade, manipule a propriedade 'WalkSpeed' através da metatable do Humanoide no __index.",
-        "ajuda": "Posso ajudar com: Otimização de código, Hooks de Metatable, Bypass de Anti-Cheat e Templates de UI.",
-        "oi": "Operador detectado. Sistema nominal. Aguardando input técnico.",
-        "roblox": "Ambiente de execução detectado. Recomendo o uso de task.wait() para evitar crashes em loops de alta frequência."
-    };
-
-    function handleAI(e) {
-        e.preventDefault();
-        const input = document.getElementById('aiInput');
-        const hist = document.getElementById('aiHistory');
-        const query = input.value.toLowerCase();
-        if(!query) return;
-
-        playSound('click');
-        hist.innerHTML += `<div class="text-right text-white/30 uppercase italic text-[10px] mb-2">> ${query}</div>`;
+    // --- RENDERIZADORES ---
+    function renderHome() {
+        const grid = document.getElementById('anime-grid');
+        grid.innerHTML = '';
         
-        setTimeout(() => {
-            let res = "Erro 404: Conhecimento não indexado. Tente termos como 'Metatable', 'Hook' ou 'Bypass'.";
-            for(let k in knowledge) if(query.includes(k)) res = knowledge[k];
-            
-            hist.innerHTML += `<div class="p-6 bg-white/5 border-l-4 border-[var(--p-accent)] rounded-r-xl text-blue-100 animate-pulse">TSUO_IA: ${res}</div>`;
-            hist.scrollTop = hist.scrollHeight;
-        }, 600);
-        input.value = '';
-    }
-
-    // --- ADMIN DASHBOARD ---
-    function renderFeed(filter = 'todos') {
-        const feed = document.getElementById('postFeed');
-        const adminList = document.getElementById('admin-list');
-        feed.innerHTML = ''; adminList.innerHTML = '';
-
-        const filtered = filter === 'todos' ? db : db.filter(x => x.cat === filter);
-        filtered.forEach(p => {
-            feed.innerHTML += `
-                <div class="glass p-8 rounded-[30px] asset-card relative group overflow-hidden">
-                    <div class="absolute inset-0 bg-gradient-to-br from-[var(--p-accent)]/10 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-500"></div>
-                    <img src="${p.img || 'https://images.unsplash.com/photo-1614850523296-d8c1af93d400'}" class="w-full h-48 object-cover rounded-2xl mb-6 opacity-60 group-hover:opacity-100 transition duration-700 group-hover:scale-105">
-                    <span class="px-3 py-1 mono text-[8px] bg-[var(--p-accent)]/20 text-[var(--p-accent)] rounded-full uppercase font-bold">${p.cat}</span>
-                    <h4 class="text-2xl font-black italic uppercase mt-4 group-hover:text-[var(--p-accent)] transition">${p.title}</h4>
-                    <p class="text-[10px] text-gray-500 mono mt-3 line-clamp-2 h-8">${p.desc}</p>
-                    <a href="${p.link}" target="_blank" onmouseenter="playSound('hover')" class="block mt-8 py-4 bg-white/5 border border-white/5 text-center mono text-[10px] font-black uppercase hover:bg-white hover:text-black transition-all">Download_Archive_V7 >></a>
-                </div>
-            `;
-        });
-
-        db.forEach(p => {
-            adminList.innerHTML += `
-                <div class="flex justify-between items-center p-4 glass rounded-xl border-l-4 border-[var(--p-accent)]">
-                    <span class="mono text-[11px] font-bold uppercase text-gray-400">${p.title}</span>
-                    <div class="flex gap-4">
-                        <button onclick="editAsset(${p.id})" class="text-blue-500 mono text-[10px] hover:underline">EDIT</button>
-                        <button onclick="deleteAsset(${p.id})" class="text-red-500 mono text-[10px] hover:underline">DEL</button>
+        db.videos.forEach(v => {
+            const vTags = db.tags.filter(t => v.tags.includes(t.id));
+            grid.innerHTML += `
+                <div class="anime-card group" onclick="playVideo(${v.id})">
+                    <div class="relative h-64 rounded-[30px] overflow-hidden shadow-lg mb-4">
+                        <img src="${v.thumb}" class="w-full h-full object-cover group-hover:scale-110 transition duration-700">
+                        <div class="play-overlay absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 transition">
+                            <div class="w-14 h-14 bg-white rounded-full flex items-center justify-center shadow-2xl">
+                                <i data-lucide="play" class="text-black fill-black w-6 h-6"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <h4 class="font-bold text-sm uppercase leading-tight line-clamp-1">${v.title}</h4>
+                    <div class="flex flex-wrap gap-1 mt-2">
+                        ${vTags.map(t => `<span class="tag-pill" style="background: ${t.color}20; color: ${t.color}">${t.name}</span>`).join('')}
                     </div>
                 </div>
             `;
         });
+
+        // Featured Hero (Top 1 ou último post)
+        const hero = document.getElementById('hero-featured');
+        if(db.videos.length > 0) {
+            const feat = db.videos[db.ranks[0]-1] || db.videos[0];
+            hero.innerHTML = `
+                <img src="${feat.thumb}" class="w-full h-full object-cover">
+                <div class="absolute inset-0 bg-gradient-to-r from-black/80 via-black/40 to-transparent p-20 flex flex-col justify-end text-white">
+                    <span class="text-[var(--p-accent)] font-black uppercase tracking-[0.4em] mb-4 text-xs">Destaque da Semana</span>
+                    <h2 class="text-6xl font-black uppercase italic mb-6">${feat.title}</h2>
+                    <p class="max-w-xl text-gray-300 text-sm mb-10 line-clamp-3">${feat.desc}</p>
+                    <button onclick="playVideo(${feat.id})" class="w-fit px-12 py-5 bg-[var(--p-accent)] rounded-2xl font-black uppercase italic flex items-center gap-4 hover:scale-105 transition">Assistir Agora <i data-lucide="play-circle"></i></button>
+                </div>
+            `;
+        }
         lucide.createIcons();
     }
 
-    function saveAsset() {
-        const id = document.getElementById('asset-id').value;
-        const asset = {
-            id: id ? parseInt(id) : Date.now(),
-            title: document.getElementById('asset-title').value,
-            cat: document.getElementById('asset-cat').value,
-            img: document.getElementById('asset-img').value,
-            link: document.getElementById('asset-link').value,
-            desc: document.getElementById('asset-desc').value
-        };
-        if(id) db[db.findIndex(x => x.id == id)] = asset;
-        else db.unshift(asset);
+    function renderRanks() {
+        const list = document.getElementById('rank-list');
+        list.innerHTML = '';
+        db.ranks.slice(0, 10).forEach((id, index) => {
+            const v = db.videos.find(x => x.id == id);
+            if(!v) return;
+            list.innerHTML += `
+                <div class="flex items-center gap-10 p-6 glass-nav rounded-3xl group cursor-pointer hover:border-[var(--p-accent)] transition" onclick="playVideo(${v.id})">
+                    <span class="text-7xl font-black italic opacity-20 group-hover:opacity-100 group-hover:text-[var(--p-accent)] transition">${index + 1}</span>
+                    <img src="${v.thumb}" class="w-40 h-24 object-cover rounded-2xl">
+                    <div class="flex-grow">
+                        <h4 class="text-2xl font-black uppercase italic">${v.title}</h4>
+                        <p class="text-xs text-gray-500 line-clamp-1">${v.desc}</p>
+                    </div>
+                    <i data-lucide="chevron-right" class="opacity-30"></i>
+                </div>
+            `;
+        });
+        lucide.createIcons();
+    }
+
+    // --- BUSCA DINÂMICA (FUZZY SEARCH) ---
+    function liveSearch(val) {
+        const box = document.getElementById('search-results');
+        if(!val) return box.classList.add('hidden');
         
-        localStorage.setItem('tsuo_titan_db', JSON.stringify(db));
-        resetForm(); renderFeed();
-        playSound('granted');
+        const results = db.videos.filter(v => v.title.toLowerCase().includes(val.toLowerCase()));
+        if(results.length === 0) return box.classList.add('hidden');
+
+        box.innerHTML = results.map(v => `
+            <div class="p-4 hover:bg-[var(--p-accent)] hover:text-white cursor-pointer flex items-center gap-4 border-b border-black/5" onclick="playVideo(${v.id})">
+                <img src="${v.thumb}" class="w-12 h-12 rounded object-cover">
+                <span class="text-xs font-bold uppercase">${v.title}</span>
+            </div>
+        `).join('');
+        box.classList.remove('hidden');
     }
 
-    function editAsset(id) {
-        const p = db.find(x => x.id == id);
-        document.getElementById('asset-id').value = p.id;
-        document.getElementById('asset-title').value = p.title;
-        document.getElementById('asset-cat').value = p.cat;
-        document.getElementById('asset-img').value = p.img;
-        document.getElementById('asset-link').value = p.link;
-        document.getElementById('asset-desc').value = p.desc;
-        switchTab('tab-assets');
+    // --- PLAYER ---
+    function playVideo(id) {
+        const v = db.videos.find(x => x.id == id);
+        if(!v) return;
+        
+        document.getElementById('player-title').innerText = v.title;
+        document.getElementById('player-desc').innerText = v.desc;
+        const player = document.getElementById('main-player');
+        player.src = v.url;
+        player.play();
+
+        const tagBox = document.getElementById('player-tags');
+        const vTags = db.tags.filter(t => v.tags.includes(t.id));
+        tagBox.innerHTML = vTags.map(t => `<span class="tag-pill" style="background: ${t.color}20; color: ${t.color}">${t.name}</span>`).join('');
+
+        document.getElementById('video-modal').style.display = 'flex';
+        
+        // Sugeridos (aleatórios)
+        const sug = db.videos.filter(x => x.id != id).slice(0, 3);
+        document.getElementById('suggested-list').innerHTML = sug.map(s => `
+            <div class="flex items-center gap-4 cursor-pointer hover:text-[var(--p-accent)]" onclick="playVideo(${s.id})">
+                <img src="${s.thumb}" class="w-16 h-10 rounded object-cover">
+                <span class="text-[10px] font-bold uppercase line-clamp-1">${s.title}</span>
+            </div>
+        `).join('');
     }
 
-    function deleteAsset(id) {
-        if(confirm("Expurgar asset da database permanentemente?")) {
-            db = db.filter(x => x.id != id);
-            localStorage.setItem('tsuo_titan_db', JSON.stringify(db));
-            renderFeed();
-        }
+    function closePlayer() {
+        const player = document.getElementById('main-player');
+        player.pause();
+        player.src = '';
+        document.getElementById('video-modal').style.display = 'none';
     }
 
-    function resetForm() {
-        document.getElementById('asset-id').value = '';
-        document.getElementById('asset-title').value = '';
-        document.getElementById('asset-img').value = '';
-        document.getElementById('asset-link').value = '';
-        document.getElementById('asset-desc').value = '';
+    // --- ADMIN ACTIONS ---
+    function saveVideo() {
+        const id = document.getElementById('edit-id').value;
+        const selectedTags = Array.from(document.querySelectorAll('.tag-chk:checked')).map(el => parseInt(el.value));
+        
+        const video = {
+            id: id ? parseInt(id) : Date.now(),
+            title: document.getElementById('v-title').value,
+            thumb: document.getElementById('v-thumb').value,
+            url: document.getElementById('v-url').value,
+            desc: document.getElementById('v-desc').value,
+            tags: selectedTags
+        };
+
+        if(id) db.videos[db.videos.findIndex(x => x.id == id)] = video;
+        else db.videos.unshift(video);
+
+        saveToLocalStorage();
+        renderAdminVideos();
+        renderHome();
+        resetVideoForm();
     }
 
-    // --- CONFIG & TEMA ---
-    function saveConfig() {
-        config.name = document.getElementById('cfg-name').value;
-        config.logo = document.getElementById('cfg-logo').value;
-        config.popup = document.getElementById('cfg-popup').value;
-        config.theme = document.getElementById('cfg-theme').value;
-        localStorage.setItem('tsuo_titan_cfg', JSON.stringify(config));
+    function saveTag() {
+        const name = document.getElementById('t-name').value;
+        const color = document.getElementById('t-color').value;
+        if(!name) return;
+        db.tags.push({ id: Date.now(), name, color });
+        saveToLocalStorage();
+        renderAdminTags();
+    }
+
+    function saveRank(index, videoId) {
+        db.ranks[index] = parseInt(videoId);
+        saveToLocalStorage();
+        renderRanks();
+    }
+
+    function saveSiteConfig() {
+        db.config.name = document.getElementById('cfg-name').value;
+        db.config.about = document.getElementById('cfg-about').value;
+        db.config.theme = document.getElementById('cfg-theme').value;
+        saveToLocalStorage();
         location.reload();
     }
 
-    function applyTheme(t) {
-        document.body.className = t + " scanline";
-        const colors = { default: 0xbc13fe, 'theme-blood': 0xff003c, 'theme-emerald': 0x00ff88, 'theme-cyber': 0x00e5ff };
-        particlesMaterial.color.setHex(colors[t] || 0xbc13fe);
+    // --- ADMIN RENDERS ---
+    function renderAdminVideos() {
+        const list = document.getElementById('adm-video-list');
+        list.innerHTML = db.videos.map(v => `
+            <div class="flex justify-between items-center p-4 bg-white/50 dark:bg-black/20 rounded-2xl">
+                <div class="flex items-center gap-4">
+                    <img src="${v.thumb}" class="w-12 h-12 rounded-lg object-cover">
+                    <span class="text-xs font-bold uppercase">${v.title}</span>
+                </div>
+                <div class="flex gap-4">
+                    <button onclick="editVideo(${v.id})" class="text-blue-500 font-bold text-[10px]">EDIT</button>
+                    <button onclick="deleteVideo(${v.id})" class="text-red-500 font-bold text-[10px]">DEL</button>
+                </div>
+            </div>
+        `).join('');
+
+        // Tag selector no formulário
+        const selector = document.getElementById('tag-selector-list');
+        selector.innerHTML = db.tags.map(t => `
+            <label class="flex items-center gap-2 p-2 px-4 bg-white dark:bg-black/20 rounded-xl cursor-pointer">
+                <input type="checkbox" value="${t.id}" class="tag-chk">
+                <span class="text-[10px] font-bold uppercase">${t.name}</span>
+            </label>
+        `).join('');
     }
 
-    // --- ANALYTICS CHART (CHART.JS) ---
-    function initChart() {
-        const ctx = document.getElementById('trafficChart').getContext('2d');
-        new Chart(ctx, {
-            type: 'line',
-            data: {
-                labels: ['00h', '04h', '08h', '12h', '16h', '20h', '24h'],
-                datasets: [{
-                    label: 'Global Traffic (TB)',
-                    data: [12, 19, 3, 5, 2, 30, 45],
-                    borderColor: '#bc13fe',
-                    borderWidth: 3,
-                    fill: true,
-                    backgroundColor: 'rgba(188, 19, 254, 0.1)'
-                }]
-            },
-            options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, grid: { color: '#1a1a1a' } }, x: { grid: { display: false } } } }
-        });
+    function renderAdminTags() {
+        const list = document.getElementById('adm-tag-list');
+        list.innerHTML = db.tags.map(t => `
+            <div class="p-4 rounded-2xl flex justify-between items-center" style="background: ${t.color}20">
+                <span class="text-xs font-black uppercase" style="color: ${t.color}">${t.name}</span>
+                <button onclick="deleteTag(${t.id})" class="text-[10px] opacity-50">Remover</button>
+            </div>
+        `).join('');
     }
 
-    // --- UTILIDADES ---
+    function renderAdminRanks() {
+        const slots = document.getElementById('rank-slots');
+        slots.innerHTML = '';
+        for(let i=0; i<10; i++) {
+            slots.innerHTML += `
+                <div class="flex items-center gap-4">
+                    <span class="w-8 font-black text-xl italic">${i+1}</span>
+                    <select onchange="saveRank(${i}, this.value)" class="flex-grow p-4 bg-black/5 rounded-xl text-xs font-bold">
+                        <option value="">Selecionar Anime...</option>
+                        ${db.videos.map(v => `<option value="${v.id}" ${db.ranks[i] == v.id ? 'selected' : ''}>${v.title}</option>`).join('')}
+                    </select>
+                </div>
+            `;
+        }
+    }
+
+    // --- UTILS ---
+    function saveToLocalStorage() { localStorage.setItem('tsuo_anime_db', JSON.stringify(db)); }
+    function showSection(id) {
+        document.querySelectorAll('main').forEach(s => s.classList.add('hidden'));
+        document.getElementById('section-' + id).classList.remove('hidden');
+        if(id === 'ranks') renderRanks();
+    }
     function switchTab(id) {
         document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
         document.getElementById(id).classList.add('active');
-        playSound('click');
-        if(id === 'tab-dash') initChart();
+        if(id === 'adm-ranks') renderAdminRanks();
+        if(id === 'adm-videos') renderAdminVideos();
+        if(id === 'adm-tags') renderAdminTags();
+    }
+    function applyTheme(t) { document.body.className = t; }
+    function openAdmin() { document.getElementById('loginModal').style.display = 'flex'; }
+    function checkAuth() {
+        if(document.getElementById('adm-pass').value === '171088') {
+            document.getElementById('loginModal').style.display = 'none';
+            document.getElementById('adminPanel').style.display = 'block';
+            renderAdminVideos();
+            renderAdminTags();
+        } else alert('Acesso Negado.');
     }
 
-    function openModal(id) { document.getElementById(id).style.display = 'flex'; playSound('hover'); }
-    function closeModal(id) { document.getElementById(id).style.display = 'none'; }
-    function closePopup() { gsap.to("#entry-popup", { opacity: 0, duration: 0.5, onComplete: () => closeModal('entry-popup') }); }
-
-    function authAdmin() {
-        if(document.getElementById('admin-pass').value === '171088') {
-            closeModal('loginModal');
-            openModal('adminPanel');
-            document.getElementById('cfg-name').value = config.name;
-            document.getElementById('cfg-logo').value = config.logo;
-            document.getElementById('cfg-popup').value = config.popup;
-            playSound('granted');
-        } else alert("ACESSO NEGADO: CHAVE INVÁLIDA.");
+    function deleteVideo(id) {
+        db.videos = db.videos.filter(v => v.id != id);
+        saveToLocalStorage(); renderAdminVideos(); renderHome();
     }
 
-    // --- BOOTSTRAP ---
-    window.onload = async () => {
-        // Init Data
-        document.getElementById('site-name').innerHTML = config.name.replace(" ", ` <span class="text-[var(--p-accent)]">`) + "</span>";
-        document.getElementById('site-logo').innerText = config.logo;
-        document.getElementById('popup-link').href = config.popup;
-        applyTheme(config.theme);
-        renderFeed();
-        
-        // Logs
-        const logBox = document.getElementById('system-logs');
-        const logs = ["Injetando DLL...", "Bypass detected.", "Sincronizando Nodes...", "Vault Decrypted.", "Limpando Logs...", "Neural Link OK."];
-        setInterval(() => {
-            const p = document.createElement('div');
-            p.innerText = `[${new Date().toLocaleTimeString()}] > ${logs[Math.floor(Math.random()*logs.length)]}`;
-            logBox.prepend(p);
-            if(logBox.children.length > 8) logBox.lastChild.remove();
-        }, 1200);
+    function editVideo(id) {
+        const v = db.videos.find(x => x.id == id);
+        document.getElementById('edit-id').value = v.id;
+        document.getElementById('v-title').value = v.title;
+        document.getElementById('v-thumb').value = v.thumb;
+        document.getElementById('v-url').value = v.url;
+        document.getElementById('v-desc').value = v.desc;
+        switchTab('adm-videos');
+    }
 
-        // Clock & Geo
-        setInterval(() => document.getElementById('real-time').innerText = new Date().toLocaleTimeString(), 1000);
-        try {
-            const res = await fetch('https://ipapi.co/json/');
-            const data = await res.json();
-            document.getElementById('user-ip').innerText = `IP: ${data.ip}`;
-            document.getElementById('user-loc').innerText = `${data.city}, ${data.country_name}`;
-        } catch(e) {}
+    function resetVideoForm() {
+        document.getElementById('edit-id').value = '';
+        document.getElementById('v-title').value = '';
+        document.getElementById('v-thumb').value = '';
+        document.getElementById('v-url').value = '';
+        document.getElementById('v-desc').value = '';
+        document.querySelectorAll('.tag-chk').forEach(c => c.checked = false);
+    }
 
-        // Entry Popup
-        setTimeout(() => {
-            openModal('entry-popup');
-            gsap.from("#popup-card", { scale: 0.5, opacity: 0, duration: 1, ease: "back.out(1.7)" });
-        }, 1500);
-
+    window.onload = () => {
+        document.getElementById('site-name').innerHTML = db.config.name.replace(" ", ` <span class="text-[var(--p-accent)]">`) + "</span>";
+        document.getElementById('about-content').innerText = db.config.about;
+        applyTheme(db.config.theme);
+        renderHome();
         lucide.createIcons();
-    };
-
-    window.onresize = () => {
-        camera.aspect = window.innerWidth / window.innerHeight;
-        camera.updateProjectionMatrix();
-        renderer.setSize(window.innerWidth, window.innerHeight);
-    };
+    }
 </script>
-
 </body>
 </html>
