@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TSUO SOCIAIS | FUTURE HUB</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/howler/2.2.3/howler.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;500;700&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --neon-purple: #bc13fe;
+            --neon-blue: #00f2ff;
+            --dark-core: #05010a;
+        }
+
+        body {
+            margin: 0;
+            background: var(--dark-core);
+            color: #fff;
+            font-family: 'Rajdhani', sans-serif;
+            overflow-x: hidden;
+            cursor: crosshair;
+        }
+
+        #canvas-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: -1;
+        }
+
+        .tech-border {
+            border: 1px solid rgba(188, 19, 254, 0.3);
+            position: relative;
+            clip-path: polygon(0% 0%, 95% 0%, 100% 15%, 100% 100%, 5% 100%, 0% 85%);
+            background: rgba(15, 5, 25, 0.7);
+            backdrop-filter: blur(10px);
+            transition: all 0.3s border;
+        }
+
+        .tech-border:hover {
+            border-color: var(--neon-purple);
+            box-shadow: 0 0 20px rgba(188, 19, 254, 0.4);
+        }
+
+        .orbitron { font-family: 'Orbitron', sans-serif; }
+
+        .neon-text {
+            text-shadow: 0 0 10px var(--neon-purple), 0 0 20px var(--neon-purple);
+        }
+
+        /* Animação de Glitch */
+        .glitch:hover {
+            animation: glitch 0.3s cubic-bezier(.25, .46, .45, .94) both infinite;
+        }
+
+        @keyframes glitch {
+            0% { transform: translate(0); }
+            20% { transform: translate(-2px, 2px); }
+            40% { transform: translate(-2px, -2px); }
+            60% { transform: translate(2px, 2px); }
+            80% { transform: translate(2px, -2px); }
+            100% { transform: translate(0); }
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            background: #00ff00;
+            border-radius: 50%;
+            display: inline-block;
+            box-shadow: 0 0 10px #00ff00;
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.3; }
+            100% { opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+
+<div id="canvas-container"></div>
+
+<div class="fixed bottom-5 right-5 z-50 flex items-center gap-3 glass p-2 rounded-full border border-white/10">
+    <span class="text-[10px] orbitron opacity-50">SYNC AUDIO</span>
+    <button onclick="toggleMusic()" id="musicBtn" class="bg-purple-600 p-2 rounded-full">
+        <i data-lucide="volume-x" id="musicIcon" class="w-4 h-4"></i>
+    </button>
+</div>
+
+<nav class="p-6 flex justify-between items-center max-w-7xl mx-auto relative z-10">
+    <div class="flex items-center gap-4">
+        <div class="w-12 h-12 tech-border flex items-center justify-center orbitron font-black text-2xl text-purple-400">T</div>
+        <div>
+            <h1 class="orbitron text-2xl font-bold tracking-widest neon-text">TSUO<span class="text-white">.SYS</span></h1>
+            <div class="flex items-center gap-2 text-[10px] opacity-60">
+                <span class="status-dot"></span> SYSTEM ONLINE | PING: 12ms
+            </div>
+        </div>
+    </div>
+    
+    <div class="flex gap-8 items-center">
+        <div class="hidden md:flex gap-6 orbitron text-xs font-bold">
+            <a href="#" onclick="playSound('nav')" class="hover:text-purple-400 transition">SCRIPTS</a>
+            <a href="#" onclick="playSound('nav')" class="hover:text-purple-400 transition">EXECUTORES</a>
+            <a href="#" onclick="playSound('nav')" class="hover:text-purple-400 transition">DATABASE</a>
+        </div>
+        <button onclick="openLogin()" class="tech-border px-6 py-2 orbitron text-xs font-bold hover:bg-purple-600/20 transition">
+            ADMIN_ACCESS
+        </button>
+    </div>
+</nav>
+
+<main class="max-w-5xl mx-auto pt-20 px-6 relative z-10 text-center">
+    <div class="inline-block px-4 py-1 border border-purple-500/30 rounded-full text-[10px] orbitron mb-6 bg-purple-500/10">
+        ULTIMATE TECH HUB v3.1
+    </div>
+    <h2 id="siteTitle" class="orbitron text-7xl font-black mb-6 tracking-tighter neon-text">TSUO SOCIAIS</h2>
+    <p id="siteAbout" class="text-xl text-gray-400 max-w-2xl mx-auto leading-relaxed mb-10">
+        Arquitetura digital avançada para distribuição de conteúdo. Hub centralizado para scripts, ferramentas e comunidade.
+    </p>
+
+    <div class="flex justify-center gap-4 mb-20">
+        <button onclick="window.open('https://discord.gg/tsuo')" class="tech-border px-8 py-4 flex items-center gap-3 glitch group">
+            <i data-lucide="discord" class="group-hover:text-indigo-400 transition"></i>
+            <span class="orbitron font-bold">JOIN_DISCORD</span>
+        </button>
+        <button class="tech-border px-8 py-4 flex items-center gap-3 glitch group">
+            <i data-lucide="youtube" class="group-hover:text-red-500 transition"></i>
+            <span class="orbitron font-bold">SUBSCRIBE</span>
+        </button>
+    </div>
+
+    <div id="postFeed" class="grid grid-cols-1 md:grid-cols-3 gap-6 pb-20">
+        </div>
+</main>
+
+<footer class="text-center py-10 opacity-30 orbitron text-[10px] tracking-[5px]">
+    TSUO SOCIAIS &copy; 2026 // ALL RIGHTS RESERVED
+</footer>
+
+<div id="loginModal" class="fixed inset-0 bg-black/90 z-[100] hidden items-center justify-center p-6 backdrop-blur-xl">
+    <div class="tech-border p-10 w-full max-w-md bg-[#0a0015]">
+        <h3 class="orbitron text-2xl mb-8 text-purple-400">AUTHENTICATION_REQUIRED</h3>
+        <div class="space-y-6">
+            <input type="text" id="user" placeholder="USER_ID" class="w-full bg-white/5 border-b border-purple-500 p-3 outline-none focus:bg-white/10 transition orbitron text-sm">
+            <input type="password" id="pass" placeholder="ACCESS_CODE" class="w-full bg-white/5 border-b border-purple-500 p-3 outline-none focus:bg-white/10 transition orbitron text-sm">
+            <button onclick="validateLogin()" class="w-full bg-purple-600 py-4 orbitron font-bold hover:bg-purple-500 transition">DECRYPT_ACCESS</button>
+            <button onclick="closeModal('loginModal')" class="w-full text-[10px] orbitron opacity-40">ABORT_CONNECTION</button>
+        </div>
+    </div>
+</div>
+
+<div id="adminPanel" class="fixed inset-0 bg-[#05010a] z-[110] hidden overflow-y-auto p-8">
+    <div class="max-w-6xl mx-auto">
+        <div class="flex justify-between items-center mb-12 border-b border-purple-500/20 pb-6">
+            <h2 class="orbitron text-3xl font-black text-purple-400">ADMIN_DASHBOARD</h2>
+            <button onclick="closeAdmin()" class="bg-red-500/20 text-red-500 px-6 py-2 tech-border orbitron text-xs">DISCONNECT</button>
+        </div>
+
+        <div class="grid md:grid-cols-2 gap-10">
+            <div class="tech-border p-8">
+                <h3 class="orbitron text-sm mb-6 text-blue-400 font-bold">SITE_CONFIG</h3>
+                <div class="space-y-4">
+                    <input type="text" id="editTitle" placeholder="SITE_NAME" class="w-full bg-black border border-white/10 p-3 rounded">
+                    <textarea id="editAbout" placeholder="SITE_DESCRIPTION" class="w-full bg-black border border-white/10 p-3 rounded h-32"></textarea>
+                    <button onclick="saveConfig()" class="w-full bg-blue-600 py-3 orbitron font-bold text-xs">COMMIT_CHANGES</button>
+                </div>
+            </div>
+
+            <div class="tech-border p-8">
+                <h3 class="orbitron text-sm mb-6 text-green-400 font-bold">CREATE_NEW_ENTRY</h3>
+                <div class="space-y-4">
+                    <input type="text" id="pTitle" placeholder="ENTRY_TITLE" class="w-full bg-black border border-white/10 p-3 rounded">
+                    <input type="text" id="pLink" placeholder="REDIRECT_URL" class="w-full bg-black border border-white/10 p-3 rounded">
+                    <input type="text" id="pImg" placeholder="IMAGE_COVER_URL" class="w-full bg-black border border-white/10 p-3 rounded">
+                    <button onclick="addPost()" class="w-full bg-green-600 py-3 orbitron font-bold text-xs">PUSH_TO_DATABASE</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="adminList" class="mt-10 space-y-2">
+            </div>
+    </div>
+</div>
+
+<script>
+    // SISTEMA DE SOM
+    const sfx = {
+        nav: new Howl({ src: ['https://assets.mixkit.co/sfx/preview/mixkit-modern-technology-select-3124.mp3'], volume: 0.3 }),
+        click: new Howl({ src: ['https://assets.mixkit.co/sfx/preview/mixkit-click-melodic-tone-1129.mp3'], volume: 0.4 }),
+        access: new Howl({ src: ['https://assets.mixkit.co/sfx/preview/mixkit-sci-fi-interface-confirm-2514.mp3'], volume: 0.5 }),
+        bgm: new Howl({ 
+            src: ['https://www.soundhelix.com/examples/mp3/SoundHelix-Song-15.mp3'], 
+            loop: true, 
+            volume: 0.2 
+        })
+    };
+
+    function playSound(type) { sfx[type].play(); }
+    
+    let musicPlaying = false;
+    function toggleMusic() {
+        if(!musicPlaying) {
+            sfx.bgm.play();
+            document.getElementById('musicIcon').setAttribute('data-lucide', 'volume-2');
+        } else {
+            sfx.bgm.pause();
+            document.getElementById('musicIcon').setAttribute('data-lucide', 'volume-x');
+        }
+        musicPlaying = !musicPlaying;
+        lucide.createIcons();
+    }
+
+    // THREE.JS - FUNDO 3D
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
+    const renderer = new THREE.WebGLRenderer({ alpha: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    document.getElementById('canvas-container').appendChild(renderer.domElement);
+
+    const geometry = new THREE.BufferGeometry();
+    const vertices = [];
+    for(let i=0; i<5000; i++) {
+        vertices.push(THREE.MathUtils.randFloatSpread(2000));
+        vertices.push(THREE.MathUtils.randFloatSpread(2000));
+        vertices.push(THREE.MathUtils.randFloatSpread(2000));
+    }
+    geometry.setAttribute('position', new THREE.Float32BufferAttribute(vertices, 3));
+    const particles = new THREE.Points(geometry, new THREE.PointsMaterial({ color: 0xbc13fe, size: 2 }));
+    scene.add(particles);
+
+    function animate() {
+        requestAnimationFrame(animate);
+        particles.rotation.y += 0.001;
+        renderer.render(scene, camera);
+    }
+    animate();
+
+    // LOGIN & ADMIN LOGIC
+    let posts = JSON.parse(localStorage.getItem('tsuo_p')) || [];
+    let config = JSON.parse(localStorage.getItem('tsuo_c')) || { 
+        title: "TSUO SOCIAIS", 
+        about: "Arquitetura digital avançada para distribuição de conteúdo." 
+    };
+
+    function openLogin() { playSound('click'); document.getElementById('loginModal').style.display = 'flex'; }
+    function closeModal(id) { document.getElementById(id).style.display = 'none'; }
+
+    function validateLogin() {
+        const u = document.getElementById('user').value;
+        const p = document.getElementById('pass').value;
+        if(u === 'TSUO' && p === '171088') {
+            playSound('access');
+            closeModal('loginModal');
+            document.getElementById('adminPanel').style.display = 'block';
+            renderAdmin();
+        } else {
+            alert('ACCESS_DENIED: INVALID_CREDENTIALS');
+        }
+    }
+
+    function saveConfig() {
+        config.title = document.getElementById('editTitle').value;
+        config.about = document.getElementById('editAbout').value;
+        localStorage.setItem('tsuo_c', JSON.stringify(config));
+        updateUI();
+        alert('DATABASE_UPDATED');
+    }
+
+    function addPost() {
+        const p = {
+            id: Date.now(),
+            title: document.getElementById('pTitle').value,
+            link: document.getElementById('pLink').value,
+            img: document.getElementById('pImg').value || 'https://images.unsplash.com/photo-1614850523296-d8c1af93d400?w=400'
+        };
+        posts.unshift(p);
+        localStorage.setItem('tsuo_p', JSON.stringify(posts));
+        renderFeed();
+        renderAdmin();
+    }
+
+    function deletePost(id) {
+        posts = posts.filter(x => x.id !== id);
+        localStorage.setItem('tsuo_p', JSON.stringify(posts));
+        renderFeed();
+        renderAdmin();
+    }
+
+    function updateUI() {
+        document.getElementById('siteTitle').innerText = config.title;
+        document.getElementById('siteAbout').innerText = config.about;
+        document.getElementById('editTitle').value = config.title;
+        document.getElementById('editAbout').value = config.about;
+    }
+
+    function renderFeed() {
+        const feed = document.getElementById('postFeed');
+        feed.innerHTML = posts.map(p => `
+            <div class="tech-border p-4 group cursor-pointer" onclick="window.open('${p.link}')">
+                <img src="${p.img}" class="w-full h-32 object-cover opacity-50 group-hover:opacity-100 transition mb-4">
+                <h4 class="orbitron text-sm font-bold neon-text">${p.title}</h4>
+                <div class="text-[10px] opacity-40 mt-2">LINK_STATUS: ENCRYPTED</div>
+            </div>
+        `).join('');
+    }
+
+    function renderAdmin() {
+        const list = document.getElementById('adminList');
+        list.innerHTML = posts.map(p => `
+            <div class="flex justify-between bg-white/5 p-3 text-xs orbitron">
+                <span>${p.title}</span>
+                <button onclick="deletePost(${p.id})" class="text-red-500">DELETE</button>
+            </div>
+        `).join('');
+    }
+
+    function closeAdmin() { document.getElementById('adminPanel').style.display = 'none'; }
+
+    // Init
+    window.onload = () => {
+        lucide.createIcons();
+        updateUI();
+        renderFeed();
+    };
+</script>
+
+</body>
+</html>
