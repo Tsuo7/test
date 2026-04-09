@@ -1,0 +1,132 @@
+local CoreGui = game:GetService("CoreGui")
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local UserInputService = game:GetService("UserInputService")
+local Workspace = game:GetService("Workspace")
+local Camera = Workspace.CurrentCamera
+local LocalPlayer = Players.LocalPlayer
+
+local function getRoot(c)
+    if not c then return nil end
+    return c:FindFirstChild("HumanoidRootPart") or c:FindFirstChild("Torso") or c:FindFirstChild("UpperTorso") or c.PrimaryPart
+end
+
+local function getHealth(c)
+    if not c then return 0 end
+    local h = c:FindFirstChildOfClass("Humanoid")
+    return h and h.Health or 0
+end
+
+local Fluent = loadstring(game:HttpGet("https://raw.githubusercontent.com/ActualMasterOogway/Fluent-Renewed/main/source.lua"))()
+
+local Window = Fluent:CreateWindow({
+    Title = "Tsuo Hub", SubTitle = "discord.gg/tsuo", TabWidth = 160,
+    Size = UDim2.fromOffset(580, 400), Acrylic = false, Theme = "Dark", 
+    MinimizeKey = Enum.KeyCode.RightControl
+})
+
+local Tabs = {
+    Aim = Window:AddTab({ Title = "Combat", Icon = "crosshair" }),
+    Vis = Window:AddTab({ Title = "Visuals", Icon = "eye" }),
+    Ply = Window:AddTab({ Title = "Player", Icon = "user" }),
+    Misc = Window:AddTab({ Title = "Misc", Icon = "box" })
+}
+
+local Options = Fluent.Options
+local aim = {E = false, F = 150, P = "Head", W = true, T = true, S = 0.2}
+
+Tabs.Aim:AddToggle("T_Aim", {Title = "Auto-Lock", Default = false}):OnChanged(function(v) aim.E = v end)
+Tabs.Aim:AddDropdown("D_Aim", {Title = "Hitbox", Values = {"Head", "Torso", "HumanoidRootPart"}, Default = 1}):OnChanged(function(v) aim.P = v end)
+Tabs.Aim:AddToggle("T_Wall", {Title = "Wall Check", Default = true}):OnChanged(function(v) aim.W = v end)
+Tabs.Aim:AddToggle("T_Team", {Title = "Team Check", Default = true}):OnChanged(function(v) aim.T = v end)
+Tabs.Aim:AddSlider("S_FOV", {Title = "FOV", Default = 150, Min = 10, Max = 800, Rounding = 0}):OnChanged(function(v) aim.F = v end)
+
+RunService.RenderStepped:Connect(function()
+    if not aim.E then return end
+    local t, minD = nil, aim.F
+    local mP = UserInputService:GetMouseLocation()
+    for _, v in pairs(Players:GetPlayers()) do
+        if v == LocalPlayer or getHealth(v.Character) <= 0 then continue end
+        if aim.T and v.Team == LocalPlayer.Team then continue end
+        local part = v.Character:FindFirstChild(aim.P) or getRoot(v.Character)
+        if part then
+            local sP, onS = Camera:WorldToViewportPoint(part.Position)
+            if onS then
+                local dist = (Vector2.new(sP.X, sP.Y) - mP).Magnitude
+                if dist < minD then
+                    if aim.W then
+                        local ray = RaycastParams.new()
+                        ray.FilterDescendantsInstances = {LocalPlayer.Character, v.Character}
+                        ray.FilterType = Enum.RaycastFilterType.Blacklist
+                        if not Workspace:Raycast(Camera.CFrame.Position, (part.Position - Camera.CFrame.Position).Unit * 1000, ray) then
+                            t, minD = part, dist
+                        end
+                    else
+                        t, minD = part, dist
+                    end
+                end
+            end
+        end
+    end
+    if t then Camera.CFrame = Camera.CFrame:Lerp(CFrame.new(Camera.CFrame.Position, t.Position), aim.S) end
+end)
+
+local esp = {E = false, C = Color3.fromRGB(140, 82, 255)}
+local cache = {}
+
+Tabs.Vis:AddToggle("T_ESP", {Title = "Chams", Default = false}):OnChanged(function(v)
+    esp.E = v
+    if not v then
+        for _, h in pairs(cache) do if h then h:Destroy() end end
+        table.clear(cache)
+    end
+end)
+
+Tabs.Vis:AddColorpicker("C_ESP", {Title = "Color", Default = Color3.fromRGB(140, 82, 255)}):OnChanged(function()
+    esp.C = Options.C_ESP.Value
+    for _, h in pairs(cache) do if h then h.FillColor = esp.C end end
+end)
+
+RunService.Heartbeat:Connect(function()
+    if not esp.E then return end
+    for _, v in pairs(Players:GetPlayers()) do
+        if v ~= LocalPlayer and getHealth(v.Character) > 0 then
+            if not cache[v] then
+                local h = Instance.new("Highlight")
+                h.FillColor, h.OutlineColor = esp.C, Color3.fromRGB(255, 255, 255)
+                h.FillTransparency, h.OutlineTransparency = 0.5, 0.1
+                h.Parent, h.Adornee = CoreGui, v.Character
+                cache[v] = h
+            else
+                cache[v].Adornee = v.Character
+            end
+        elseif getHealth(v.Character) <= 0 and cache[v] then
+            cache[v]:Destroy()
+            cache[v] = nil
+        end
+    end
+end)
+
+Tabs.Ply:AddToggle("T_Spd", {Title = "Custom Speed", Default = false})
+Tabs.Ply:AddSlider("S_Spd", {Title = "WalkSpeed", Default = 16, Min = 16, Max = 200, Rounding = 0})
+
+RunService.Stepped:Connect(function()
+    if Options.T_Spd and Options.T_Spd.Value and getHealth(LocalPlayer.Character) > 0 then
+        local hum = LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
+        if hum then hum.WalkSpeed = Options.S_Spd.Value end
+    end
+end)
+
+Tabs.Misc:AddButton({Title = "FPS Boost", Callback = function()
+    for _, v in pairs(Workspace:GetDescendants()) do
+        if v:IsA("BasePart") then v.Material = Enum.Material.SmoothPlastic end
+        if v:IsA("Texture") or v:IsA("Decal") then v:Destroy() end
+    end
+end})
+
+Tabs.Misc:AddButton({Title = "Rejoin", Callback = function()
+    game:GetService("TeleportService"):TeleportToPlaceInstance(game.PlaceId, game.JobId, LocalPlayer)
+end})
+
+Window:SelectTab(1)
+Fluent:Notify({Title = "Tsuo Hub", Content = "Carregado!", Duration = 3})
