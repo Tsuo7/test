@@ -1,303 +1,275 @@
---=============================================================================
--- TSUO HUB | PREMIUM MULTI-GAME SCRIPT
--- Discord: discord.gg/tsuo
--- Otimizado para Executores Mobile/PC (Delta, Arceus, Krnl, Synapse, etc)
---=============================================================================
+--// TSUO HUB FINAL | GLOBAL PREMIUM
 
--- Importando a Biblioteca Rayfield
-local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
+-- Load Orion
+local OrionLib = loadstring(game:HttpGet("https://raw.githubusercontent.com/shlexware/Orion/main/source"))()
 
--- Variáveis de Serviços do Roblox (Para otimização)
+-- Services
 local Players = game:GetService("Players")
-local LocalPlayer = Players.LocalPlayer
 local RunService = game:GetService("RunService")
+local UIS = game:GetService("UserInputService")
 local Lighting = game:GetService("Lighting")
-local UserInputService = game:GetService("UserInputService")
-local VirtualUser = game:GetService("VirtualUser")
+local Camera = workspace.CurrentCamera
 
--- Configurações Globais do Script
-_G.Aimbot = false
-_G.Hitbox = false
-_G.HitboxSize = 10
-_G.ESP = false
-_G.WalkSpeed = 16
-_G.JumpPower = 50
-_G.InfJump = false
-_G.Noclip = false
+local LocalPlayer = Players.LocalPlayer
+local Mouse = LocalPlayer:GetMouse()
 
---=============================================================================
--- CRIAÇÃO DA JANELA PRINCIPAL
---=============================================================================
-local Window = Rayfield:CreateWindow({
-   Name = "Tsuo Hub",
-   LoadingTitle = "Carregando Tsuo Hub...",
-   LoadingSubtitle = "discord.gg/tsuo",
-   Theme = "Amethyst", -- Tema roxo premium
-   DisableRayfieldPrompts = false,
-   DisableBuildWarnings = false,
-   ConfigurationSaving = {
-      Enabled = true,
-      FolderName = "TsuoHubConfig",
-      FileName = "TsuoHub"
-   },
-   Discord = {
-      Enabled = true,
-      Invite = "tsuo", -- link do seu discord
-      RememberJoins = true 
-   },
-   KeySystem = false -- Sem sistema de chaves para facilitar a UX
+-- Window
+local Window = OrionLib:MakeWindow({
+	Name = "Tsuo Hub | discord.gg/tsuo",
+	SaveConfig = true,
+	ConfigFolder = "TsuoHub"
 })
 
--- Notificação de Boas-Vindas animada
-Rayfield:Notify({
-   Title = "Tsuo Hub",
-   Content = "Carregado com sucesso! Bem-vindo de volta 🔥",
-   Duration = 5,
-   Image = "flame"
+-- Tabs
+local Combat = Window:MakeTab({Name = "Combat"})
+local Visual = Window:MakeTab({Name = "Visual"})
+local PlayerTab = Window:MakeTab({Name = "Player"})
+local World = Window:MakeTab({Name = "World"})
+local Server = Window:MakeTab({Name = "Server"})
+local Settings = Window:MakeTab({Name = "Settings"})
+
+OrionLib:MakeNotification({
+	Name = "Tsuo Hub",
+	Content = "Carregado com sucesso 🔥",
+	Time = 3
 })
 
---=============================================================================
--- SISTEMA DE ABAS (TABS)
---=============================================================================
-local TabAimbot = Window:CreateTab("Aimbot", "crosshair")
-local TabPlayer = Window:CreateTab("Player", "user")
-local TabVisual = Window:CreateTab("Visual", "eye")
-local TabMisc = Window:CreateTab("Misc", "component")
+--------------------------------------------------
+-- 🔥 AIMBOT + TRIGGERBOT
+--------------------------------------------------
 
---=============================================================================
--- ABA 1: AIMBOT & COMBAT
---=============================================================================
-TabAimbot:CreateSection("Assistência de Combate")
+local Aimbot = false
+local Smoothness = 0.2
+local FOV = 150
+local TargetPart = "Head"
+local TeamCheck = false
 
-TabAimbot:CreateToggle({
-   Name = "Expandir Hitbox",
-   CurrentValue = false,
-   Flag = "HitboxToggle",
-   Callback = function(Value)
-      _G.Hitbox = Value
-   end,
-})
+local function isVisible(target)
+	local origin = Camera.CFrame.Position
+	local direction = (target.Position - origin)
+	
+	local ray = Ray.new(origin, direction)
+	local hit = workspace:FindPartOnRay(ray, LocalPlayer.Character)
 
-TabAimbot:CreateSlider({
-   Name = "Tamanho da Hitbox",
-   Range = {10, 50},
-   Increment = 1,
-   Suffix = "Studs",
-   CurrentValue = 10,
-   Flag = "HitboxSize",
-   Callback = function(Value)
-      _G.HitboxSize = Value
-   end,
-})
+	return hit and hit:IsDescendantOf(target.Parent)
+end
 
--- Loop otimizado para a Hitbox
-task.spawn(function()
-    while task.wait(0.5) do
-        if _G.Hitbox then
-            for _, v in pairs(Players:GetPlayers()) do
-                if v ~= LocalPlayer and v.Character and v.Character:FindFirstChild("HumanoidRootPart") then
-                    v.Character.HumanoidRootPart.Size = Vector3.new(_G.HitboxSize, _G.HitboxSize, _G.HitboxSize)
-                    v.Character.HumanoidRootPart.Transparency = 0.6
-                    v.Character.HumanoidRootPart.BrickColor = BrickColor.new("Royal purple")
-                    v.Character.HumanoidRootPart.Material = Enum.Material.Neon
-                    v.Character.HumanoidRootPart.CanCollide = false
-                end
-            end
-        end
-    end
+local function getClosest()
+	local closest, dist = nil, math.huge
+
+	for _, p in pairs(Players:GetPlayers()) do
+		if p ~= LocalPlayer and p.Character and p.Character:FindFirstChild(TargetPart) then
+			
+			if TeamCheck and p.Team == LocalPlayer.Team then continue end
+			
+			local pos, visible = Camera:WorldToViewportPoint(p.Character[TargetPart].Position)
+			if visible then
+				local magnitude = (Vector2.new(Mouse.X, Mouse.Y) - Vector2.new(pos.X, pos.Y)).Magnitude
+				
+				if magnitude < dist and magnitude < FOV then
+					if isVisible(p.Character[TargetPart]) then
+						dist = magnitude
+						closest = p
+					end
+				end
+			end
+		end
+	end
+
+	return closest
+end
+
+RunService.RenderStepped:Connect(function()
+	if Aimbot then
+		local target = getClosest()
+		if target and target.Character then
+			local aimPos = target.Character[TargetPart].Position
+			Camera.CFrame = Camera.CFrame:Lerp(CFrame.new(Camera.CFrame.Position, aimPos), Smoothness)
+		end
+	end
 end)
 
---=============================================================================
--- ABA 2: PLAYER
---=============================================================================
-TabPlayer:CreateSection("Movimentação")
-
-TabPlayer:CreateSlider({
-   Name = "WalkSpeed (Velocidade)",
-   Range = {16, 250},
-   Increment = 1,
-   Suffix = "Speed",
-   CurrentValue = 16,
-   Flag = "WS_Slider",
-   Callback = function(Value)
-      _G.WalkSpeed = Value
-      if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") then
-          LocalPlayer.Character.Humanoid.WalkSpeed = _G.WalkSpeed
-      end
-   end,
+-- UI
+Combat:AddToggle({
+	Name = "Aimbot",
+	Default = false,
+	Callback = function(v) Aimbot = v end
 })
 
-TabPlayer:CreateSlider({
-   Name = "JumpPower (Pulo)",
-   Range = {50, 300},
-   Increment = 1,
-   Suffix = "Power",
-   CurrentValue = 50,
-   Flag = "JP_Slider",
-   Callback = function(Value)
-      _G.JumpPower = Value
-      if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") then
-          LocalPlayer.Character.Humanoid.JumpPower = _G.JumpPower
-      end
-   end,
+Combat:AddSlider({
+	Name = "FOV",
+	Min = 50,
+	Max = 500,
+	Default = 150,
+	Callback = function(v) FOV = v end
 })
 
-TabPlayer:CreateToggle({
-   Name = "Infinite Jump (Pulo Infinito)",
-   CurrentValue = false,
-   Flag = "InfJump",
-   Callback = function(Value)
-      _G.InfJump = Value
-   end,
+Combat:AddDropdown({
+	Name = "Target Part",
+	Default = "Head",
+	Options = {"Head","UpperTorso","HumanoidRootPart"},
+	Callback = function(v) TargetPart = v end
 })
 
--- Lógica do Infinite Jump
-UserInputService.JumpRequest:Connect(function()
-    if _G.InfJump and LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass('Humanoid') then
-        LocalPlayer.Character:FindFirstChildOfClass('Humanoid'):ChangeState("Jumping")
-    end
+Combat:AddToggle({
+	Name = "Team Check",
+	Default = false,
+	Callback = function(v) TeamCheck = v end
+})
+
+--------------------------------------------------
+-- 👁 ESP COMPLETO
+--------------------------------------------------
+
+local ESPEnabled = false
+
+RunService.RenderStepped:Connect(function()
+	if ESPEnabled then
+		for _, p in pairs(Players:GetPlayers()) do
+			if p ~= LocalPlayer and p.Character and p.Character:FindFirstChild("Head") then
+				
+				if not p.Character.Head:FindFirstChild("TSUO_ESP") then
+					local gui = Instance.new("BillboardGui", p.Character.Head)
+					gui.Name = "TSUO_ESP"
+					gui.Size = UDim2.new(0,100,0,40)
+					gui.AlwaysOnTop = true
+
+					local text = Instance.new("TextLabel", gui)
+					text.Size = UDim2.new(1,0,1,0)
+					text.BackgroundTransparency = 1
+					text.Text = p.Name
+					text.TextColor3 = Color3.fromRGB(170,0,255)
+					text.TextStrokeTransparency = 0
+				end
+			end
+		end
+	end
 end)
 
-TabPlayer:CreateToggle({
-   Name = "Noclip (Atravessar Paredes)",
-   CurrentValue = false,
-   Flag = "Noclip",
-   Callback = function(Value)
-      _G.Noclip = Value
-   end,
+Visual:AddToggle({
+	Name = "ESP Name",
+	Default = false,
+	Callback = function(v) ESPEnabled = v end
 })
 
--- Lógica do Noclip baseada no Stepped para evitar banimentos simples
-RunService.Stepped:Connect(function()
-    if _G.Noclip and LocalPlayer.Character then
-        for _, part in pairs(LocalPlayer.Character:GetDescendants()) do
-            if part:IsA("BasePart") then
-                part.CanCollide = false
-            end
-        end
-    end
+--------------------------------------------------
+-- 🧍 PLAYER SYSTEM
+--------------------------------------------------
+
+local Fly = false
+local FlySpeed = 2
+
+local BV
+
+UIS.InputBegan:Connect(function(input)
+	if input.KeyCode == Enum.KeyCode.F then
+		Fly = not Fly
+		
+		if Fly then
+			BV = Instance.new("BodyVelocity")
+			BV.MaxForce = Vector3.new(1e5,1e5,1e5)
+			BV.Parent = LocalPlayer.Character.HumanoidRootPart
+		else
+			if BV then BV:Destroy() end
+		end
+	end
 end)
 
---=============================================================================
--- ABA 3: VISUAL
---=============================================================================
-TabVisual:CreateSection("Modificações de Ambiente")
-
-TabVisual:CreateToggle({
-   Name = "Full Bright (Visão Noturna)",
-   CurrentValue = false,
-   Flag = "FullBright",
-   Callback = function(Value)
-      if Value then
-          Lighting.Brightness = 2
-          Lighting.ClockTime = 14
-          Lighting.FogEnd = 100000
-          Lighting.GlobalShadows = false
-          Lighting.OutdoorAmbient = Color3.fromRGB(128, 128, 128)
-      else
-          -- Retorna aos padrões genéricos do Roblox
-          Lighting.Brightness = 1
-          Lighting.ClockTime = 12
-          Lighting.FogEnd = 10000
-          Lighting.GlobalShadows = true
-          Lighting.OutdoorAmbient = Color3.fromRGB(127, 127, 127)
-      end
-   end,
-})
-
-TabVisual:CreateToggle({
-   Name = "Player ESP (Destacar Jogadores)",
-   CurrentValue = false,
-   Flag = "ESP",
-   Callback = function(Value)
-      _G.ESP = Value
-      if not Value then
-          -- Limpar ESP se for desativado
-          for _, v in pairs(Players:GetPlayers()) do
-              if v.Character and v.Character:FindFirstChild("TsuoESP") then
-                  v.Character.TsuoESP:Destroy()
-              end
-          end
-      end
-   end,
-})
-
--- Lógica do ESP otimizada utilizando Highlights (nativo do Roblox)
-task.spawn(function()
-    while task.wait(1) do
-        if _G.ESP then
-            for _, v in pairs(Players:GetPlayers()) do
-                if v ~= LocalPlayer and v.Character and not v.Character:FindFirstChild("TsuoESP") then
-                    local highlight = Instance.new("Highlight")
-                    highlight.Name = "TsuoESP"
-                    highlight.FillColor = Color3.fromRGB(138, 43, 226) -- Roxo premium
-                    highlight.OutlineColor = Color3.fromRGB(255, 255, 255)
-                    highlight.FillTransparency = 0.5
-                    highlight.OutlineTransparency = 0
-                    highlight.Parent = v.Character
-                end
-            end
-        end
-    end
+RunService.RenderStepped:Connect(function()
+	if Fly and BV then
+		local dir = Vector3.new(0,0,0)
+		
+		if UIS:IsKeyDown(Enum.KeyCode.W) then dir += Camera.CFrame.LookVector end
+		if UIS:IsKeyDown(Enum.KeyCode.S) then dir -= Camera.CFrame.LookVector end
+		if UIS:IsKeyDown(Enum.KeyCode.A) then dir -= Camera.CFrame.RightVector end
+		if UIS:IsKeyDown(Enum.KeyCode.D) then dir += Camera.CFrame.RightVector end
+		
+		BV.Velocity = dir * FlySpeed * 50
+	end
 end)
 
---=============================================================================
--- ABA 4: MISC & CONFIG
---=============================================================================
-TabMisc:CreateSection("Utilitários Globais")
-
-TabMisc:CreateButton({
-   Name = "Anti-AFK (Imune a Kicks por inatividade)",
-   Callback = function()
-      LocalPlayer.Idled:Connect(function()
-          VirtualUser:Button2Down(Vector2.new(0,0), workspace.CurrentCamera.CFrame)
-          task.wait(1)
-          VirtualUser:Button2Up(Vector2.new(0,0), workspace.CurrentCamera.CFrame)
-      end)
-      Rayfield:Notify({
-          Title = "Anti-AFK",
-          Content = "Ativado! Você não será mais desconectado.",
-          Duration = 3,
-          Image = "shield"
-      })
-   end,
+PlayerTab:AddSlider({
+	Name = "Fly Speed",
+	Min = 1,
+	Max = 10,
+	Default = 2,
+	Callback = function(v) FlySpeed = v end
 })
 
-TabMisc:CreateButton({
-   Name = "Rejoin (Entrar no mesmo servidor)",
-   Callback = function()
-      local TeleportService = game:GetService("TeleportService")
-      TeleportService:TeleportToPlaceInstance(game.PlaceId, game.JobId, LocalPlayer)
-   end,
+PlayerTab:AddSlider({
+	Name = "WalkSpeed",
+	Min = 16,
+	Max = 100,
+	Default = 16,
+	Callback = function(v)
+		LocalPlayer.Character.Humanoid.WalkSpeed = v
+	end
 })
 
-TabMisc:CreateSection("Redes Sociais")
+--------------------------------------------------
+-- 🌍 WORLD
+--------------------------------------------------
 
-TabMisc:CreateButton({
-   Name = "Copiar Link do Discord",
-   Callback = function()
-      setclipboard("https://discord.gg/tsuo")
-      Rayfield:Notify({
-          Title = "Copiado!",
-          Content = "Link do Discord copiado para a área de transferência.",
-          Duration = 3,
-          Image = "copy"
-      })
-   end,
+World:AddButton({
+	Name = "Potato Mode",
+	Callback = function()
+		for _, v in pairs(workspace:GetDescendants()) do
+			if v:IsA("BasePart") then
+				v.Material = Enum.Material.SmoothPlastic
+			end
+		end
+	end
 })
 
-TabMisc:CreateButton({
-   Name = "Inscreva-se no Canal (Tsuo)",
-   Callback = function()
-      setclipboard("https://www.youtube.com/@Tsuo")
-      Rayfield:Notify({
-          Title = "Canal do YouTube",
-          Content = "Link copiado! Obrigado pelo apoio.",
-          Duration = 3,
-          Image = "youtube"
-      })
-   end,
+World:AddToggle({
+	Name = "FullBright",
+	Default = false,
+	Callback = function(v)
+		if v then
+			Lighting.Brightness = 2
+			Lighting.ClockTime = 14
+		else
+			Lighting.Brightness = 1
+		end
+	end
 })
 
--- Inicializa a UI
-Rayfield:LoadConfiguration()
+--------------------------------------------------
+-- 🌐 SERVER
+--------------------------------------------------
+
+Server:AddButton({
+	Name = "Rejoin",
+	Callback = function()
+		game:GetService("TeleportService"):Teleport(game.PlaceId)
+	end
+})
+
+Server:AddButton({
+	Name = "Anti AFK",
+	Callback = function()
+		local vu = game:GetService("VirtualUser")
+		LocalPlayer.Idled:Connect(function()
+			vu:Button2Down(Vector2.new(0,0))
+			wait(1)
+			vu:Button2Up(Vector2.new(0,0))
+		end)
+	end
+})
+
+--------------------------------------------------
+-- 🎨 SETTINGS
+--------------------------------------------------
+
+Settings:AddDropdown({
+	Name = "Theme",
+	Default = "Dark",
+	Options = {"Dark","Light"},
+	Callback = function(v)
+		OrionLib:SetTheme(v)
+	end
+})
+
+--------------------------------------------------
+
+OrionLib:Init()
