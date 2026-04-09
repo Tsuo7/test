@@ -1,0 +1,543 @@
+--=============================================================================
+-- TSUO HUB | V2 - ULTIMATE APELÃO EDITION
+-- Discord: discord.gg/tsuo
+-- Otimizado para Executores Mobile/PC (Delta, Arceus, Codex, etc)
+--=============================================================================
+
+local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
+
+-- Serviços
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+local RunService = game:GetService("RunService")
+local Lighting = game:GetService("Lighting")
+local UserInputService = game:GetService("UserInputService")
+local VirtualUser = game:GetService("VirtualUser")
+local Camera = workspace.CurrentCamera
+local Mouse = LocalPlayer:GetMouse()
+
+--=============================================================================
+-- VARIÁVEIS GLOBAIS (Configurações)
+--=============================================================================
+local Tsuo = {
+    Aimbot = {
+        Enabled = false,
+        AimPart = "Head",
+        Smoothness = 1,
+        TeamCheck = false,
+        WallCheck = false,
+        ShowFOV = false,
+        FOVRadius = 150,
+        FOVColor = Color3.fromRGB(138, 43, 226)
+    },
+    Visuals = {
+        ESP_Box = false,
+        ESP_Tracer = false,
+        ESP_Name = false,
+        Chams = false,
+        Crosshair = false
+    },
+    Player = {
+        WalkSpeed = 16,
+        JumpPower = 50,
+        Flying = false,
+        FlySpeed = 50,
+        Fling = false
+    }
+}
+
+--=============================================================================
+-- LÓGICA DE FOV E AIMBOT (DESENHO NA TELA)
+--=============================================================================
+local FOVCircle = Drawing.new("Circle")
+FOVCircle.Position = Vector2.new(Camera.ViewportSize.X / 2, Camera.ViewportSize.Y / 2)
+FOVCircle.Radius = Tsuo.Aimbot.FOVRadius
+FOVCircle.Filled = false
+FOVCircle.Color = Tsuo.Aimbot.FOVColor
+FOVCircle.Visible = false
+FOVCircle.Thickness = 1.5
+
+local function GetClosestPlayer()
+    local closestPlayer = nil
+    local shortestDistance = Tsuo.Aimbot.FOVRadius
+
+    for _, v in pairs(Players:GetPlayers()) do
+        if v ~= LocalPlayer and v.Character and v.Character:FindFirstChild("Humanoid") and v.Character.Humanoid.Health > 0 and v.Character:FindFirstChild(Tsuo.Aimbot.AimPart) then
+            if Tsuo.Aimbot.TeamCheck and v.Team == LocalPlayer.Team then continue end
+            
+            local pos, onScreen = Camera:WorldToViewportPoint(v.Character[Tsuo.Aimbot.AimPart].Position)
+            if onScreen then
+                local magnitude = (Vector2.new(pos.X, pos.Y) - Vector2.new(Mouse.X, Mouse.Y)).Magnitude
+                if magnitude < shortestDistance then
+                    -- Wall Check Básico
+                    if Tsuo.Aimbot.WallCheck then
+                        local ray = Ray.new(Camera.CFrame.Position, (v.Character[Tsuo.Aimbot.AimPart].Position - Camera.CFrame.Position).Unit * 500)
+                        local hit, _ = workspace:FindPartOnRayWithIgnoreList(ray, {LocalPlayer.Character})
+                        if hit and hit:IsDescendantOf(v.Character) then
+                            closestPlayer = v
+                            shortestDistance = magnitude
+                        end
+                    else
+                        closestPlayer = v
+                        shortestDistance = magnitude
+                    end
+                end
+            end
+        end
+    end
+    return closestPlayer
+end
+
+RunService.RenderStepped:Connect(function()
+    -- Atualizar FOV
+    FOVCircle.Position = Vector2.new(UserInputService:GetMouseLocation().X, UserInputService:GetMouseLocation().Y)
+    FOVCircle.Radius = Tsuo.Aimbot.FOVRadius
+    FOVCircle.Visible = Tsuo.Aimbot.ShowFOV
+    FOVCircle.Color = Tsuo.Aimbot.FOVColor
+
+    -- Lógica do Aimbot
+    if Tsuo.Aimbot.Enabled then
+        local target = GetClosestPlayer()
+        if target and target.Character and target.Character:FindFirstChild(Tsuo.Aimbot.AimPart) then
+            local targetPos = target.Character[Tsuo.Aimbot.AimPart].Position
+            local currentCam = Camera.CFrame
+            local aimCFrame = CFrame.new(currentCam.Position, targetPos)
+            -- Aplica suavidade (Smoothness)
+            Camera.CFrame = currentCam:Lerp(aimCFrame, Tsuo.Aimbot.Smoothness / 10)
+        end
+    end
+end)
+
+--=============================================================================
+-- CRIAÇÃO DA UI PRINCIPAL
+--=============================================================================
+local Window = Rayfield:CreateWindow({
+   Name = "Tsuo Hub | Premium",
+   LoadingTitle = "Injetando Módulos...",
+   LoadingSubtitle = "O Terror dos Servidores chegou.",
+   Theme = "Amethyst",
+   ConfigurationSaving = { Enabled = false },
+   Discord = { Enabled = true, Invite = "tsuo", RememberJoins = true },
+   KeySystem = false
+})
+
+local TabAimbot = Window:CreateTab("Aimbot & Combat", "crosshair")
+local TabVisual = Window:CreateTab("Visual & ESP", "eye")
+local TabPlayer = Window:CreateTab("Player & Mov.", "user")
+local TabMisc = Window:CreateTab("Misc & Server", "component")
+
+--=============================================================================
+-- ABA 1: AIMBOT & COMBAT
+--=============================================================================
+TabAimbot:CreateSection("Aimbot Master (Camera Lock)")
+
+TabAimbot:CreateToggle({
+   Name = "Ativar Aimbot",
+   CurrentValue = false,
+   Flag = "AimToggle",
+   Callback = function(Value) Tsuo.Aimbot.Enabled = Value end,
+})
+
+TabAimbot:CreateDropdown({
+   Name = "Parte do Corpo",
+   Options = {"Head", "HumanoidRootPart", "Torso"},
+   CurrentOption = {"Head"},
+   MultipleOptions = false,
+   Flag = "AimPart",
+   Callback = function(Option) Tsuo.Aimbot.AimPart = Option[1] end,
+})
+
+TabAimbot:CreateSlider({
+   Name = "Suavidade (Smoothness)",
+   Range = {1, 10},
+   Increment = 1,
+   Suffix = "Max = Instant",
+   CurrentValue = 10,
+   Flag = "Smooth",
+   Callback = function(Value) Tsuo.Aimbot.Smoothness = Value end,
+})
+
+TabAimbot:CreateSection("Configurações do Aimbot")
+
+TabAimbot:CreateToggle({
+   Name = "Wall Check (Não atirar atrás da parede)",
+   CurrentValue = false,
+   Flag = "WallC",
+   Callback = function(Value) Tsuo.Aimbot.WallCheck = Value end,
+})
+
+TabAimbot:CreateToggle({
+   Name = "Team Check (Ignorar aliados)",
+   CurrentValue = false,
+   Flag = "TeamC",
+   Callback = function(Value) Tsuo.Aimbot.TeamCheck = Value end,
+})
+
+TabAimbot:CreateToggle({
+   Name = "Mostrar FOV Circle",
+   CurrentValue = false,
+   Flag = "FOVShow",
+   Callback = function(Value) Tsuo.Aimbot.ShowFOV = Value end,
+})
+
+TabAimbot:CreateSlider({
+   Name = "Tamanho do FOV",
+   Range = {50, 600},
+   Increment = 10,
+   Suffix = "Radius",
+   CurrentValue = 150,
+   Flag = "FOVRad",
+   Callback = function(Value) Tsuo.Aimbot.FOVRadius = Value end,
+})
+
+TabAimbot:CreateSection("Funções Apelonas")
+
+TabAimbot:CreateToggle({
+   Name = "Hitbox Expander Supremo",
+   CurrentValue = false,
+   Flag = "HitboxExp",
+   Callback = function(Value)
+      _G.Hitbox = Value
+   end,
+})
+
+TabAimbot:CreateSlider({
+   Name = "Tamanho da Hitbox",
+   Range = {2, 50},
+   Increment = 1,
+   Suffix = "Studs",
+   CurrentValue = 15,
+   Flag = "HitSize",
+   Callback = function(Value)
+      _G.HitboxSize = Value
+   end,
+})
+
+task.spawn(function()
+    while task.wait(0.1) do
+        if _G.Hitbox then
+            for _, v in pairs(Players:GetPlayers()) do
+                if v ~= LocalPlayer and v.Character and v.Character:FindFirstChild("HumanoidRootPart") then
+                    v.Character.HumanoidRootPart.Size = Vector3.new(_G.HitboxSize, _G.HitboxSize, _G.HitboxSize)
+                    v.Character.HumanoidRootPart.Transparency = 0.5
+                    v.Character.HumanoidRootPart.BrickColor = BrickColor.new("Magenta")
+                    v.Character.HumanoidRootPart.Material = Enum.Material.ForceField
+                    v.Character.HumanoidRootPart.CanCollide = false
+                end
+            end
+        end
+    end
+end)
+
+TabAimbot:CreateToggle({
+   Name = "TriggerBot (Atira sozinho na mira)",
+   CurrentValue = false,
+   Flag = "TriggerBot",
+   Callback = function(Value)
+      _G.TriggerBot = Value
+   end,
+})
+
+-- TriggerBot Simples via Mouse.Target
+RunService.RenderStepped:Connect(function()
+    if _G.TriggerBot and Mouse.Target then
+        if Mouse.Target.Parent:FindFirstChild("Humanoid") and Mouse.Target.Parent.Name ~= LocalPlayer.Name then
+            mouse1click()
+            task.wait(0.1)
+        end
+    end
+end)
+
+--=============================================================================
+-- ABA 2: VISUAL & ESP (DRAWING API)
+--=============================================================================
+TabVisual:CreateSection("ESP Avançado (Drawing API)")
+
+TabVisual:CreateToggle({
+   Name = "ESP Box (Caixas nos Inimigos)",
+   CurrentValue = false,
+   Flag = "EspBox",
+   Callback = function(Value) Tsuo.Visuals.ESP_Box = Value end,
+})
+
+TabVisual:CreateToggle({
+   Name = "ESP Tracers (Linhas)",
+   CurrentValue = false,
+   Flag = "EspTracer",
+   Callback = function(Value) Tsuo.Visuals.ESP_Tracer = Value end,
+})
+
+TabVisual:CreateToggle({
+   Name = "ESP Name (Nomes)",
+   CurrentValue = false,
+   Flag = "EspName",
+   Callback = function(Value) Tsuo.Visuals.ESP_Name = Value end,
+})
+
+-- Lógica de ESP universal simplificada para Inserção
+local function CreateESP(player)
+    local box = Drawing.new("Square")
+    box.Visible = false
+    box.Color = Color3.fromRGB(138, 43, 226)
+    box.Thickness = 2
+    box.Transparency = 1
+    box.Filled = false
+
+    local tracer = Drawing.new("Line")
+    tracer.Visible = false
+    tracer.Color = Color3.fromRGB(138, 43, 226)
+    tracer.Thickness = 1.5
+    tracer.Transparency = 1
+
+    local name = Drawing.new("Text")
+    name.Visible = false
+    name.Color = Color3.new(1, 1, 1)
+    name.Size = 18
+    name.Center = true
+    name.Outline = true
+
+    RunService.RenderStepped:Connect(function()
+        if player.Character and player.Character:FindFirstChild("HumanoidRootPart") and player.Character:FindFirstChild("Humanoid").Health > 0 and player ~= LocalPlayer then
+            local vector, onScreen = Camera:WorldToViewportPoint(player.Character.HumanoidRootPart.Position)
+            local rootPart = player.Character.HumanoidRootPart
+            local head = player.Character:FindFirstChild("Head")
+
+            if onScreen then
+                if Tsuo.Visuals.ESP_Box and head then
+                    local headPos, _ = Camera:WorldToViewportPoint(head.Position + Vector3.new(0, 0.5, 0))
+                    local legPos, _ = Camera:WorldToViewportPoint(rootPart.Position - Vector3.new(0, 3, 0))
+                    
+                    box.Size = Vector2.new(2000 / vector.Z, headPos.Y - legPos.Y)
+                    box.Position = Vector2.new(vector.X - box.Size.X / 2, legPos.Y)
+                    box.Visible = true
+                else box.Visible = false end
+
+                if Tsuo.Visuals.ESP_Tracer then
+                    tracer.From = Vector2.new(Camera.ViewportSize.X / 2, Camera.ViewportSize.Y)
+                    tracer.To = Vector2.new(vector.X, vector.Y)
+                    tracer.Visible = true
+                else tracer.Visible = false end
+
+                if Tsuo.Visuals.ESP_Name then
+                    name.Position = Vector2.new(vector.X, vector.Y - 40)
+                    name.Text = player.Name .. " [" .. math.floor(player.Character.Humanoid.Health) .. " HP]"
+                    name.Visible = true
+                else name.Visible = false end
+            else
+                box.Visible = false
+                tracer.Visible = false
+                name.Visible = false
+            end
+        else
+            box.Visible = false
+            tracer.Visible = false
+            name.Visible = false
+        end
+    end)
+end
+
+for _, v in pairs(Players:GetPlayers()) do
+    if v ~= LocalPlayer then CreateESP(v) end
+end
+Players.PlayerAdded:Connect(function(v) CreateESP(v) end)
+
+TabVisual:CreateSection("Modificações de Mundo")
+
+TabVisual:CreateToggle({
+   Name = "Chams (Brilho através das paredes)",
+   CurrentValue = false,
+   Flag = "ChamsToggle",
+   Callback = function(Value)
+      _G.Chams = Value
+      while _G.Chams do
+         task.wait(1)
+         for _, v in pairs(Players:GetPlayers()) do
+             if v ~= LocalPlayer and v.Character and not v.Character:FindFirstChild("TsuoChams") then
+                 local highlight = Instance.new("Highlight", v.Character)
+                 highlight.Name = "TsuoChams"
+                 highlight.FillColor = Color3.fromRGB(138, 43, 226)
+                 highlight.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
+             end
+         end
+      end
+      if not _G.Chams then
+         for _, v in pairs(Players:GetPlayers()) do
+             if v.Character and v.Character:FindFirstChild("TsuoChams") then
+                 v.Character.TsuoChams:Destroy()
+             end
+         end
+      end
+   end,
+})
+
+TabVisual:CreateToggle({
+   Name = "FullBright (Visão de Águia)",
+   CurrentValue = false,
+   Flag = "FullB",
+   Callback = function(Value)
+      if Value then Lighting.Brightness = 3; Lighting.ClockTime = 12; Lighting.GlobalShadows = false
+      else Lighting.Brightness = 1; Lighting.GlobalShadows = true end
+   end,
+})
+
+--=============================================================================
+-- ABA 3: PLAYER & MOVIMENTAÇÃO
+--=============================================================================
+TabPlayer:CreateSection("Controle de Atributos")
+
+TabPlayer:CreateSlider({
+   Name = "WalkSpeed Hack", Range = {16, 500}, Increment = 10, CurrentValue = 16, Flag = "WS",
+   Callback = function(Value) LocalPlayer.Character.Humanoid.WalkSpeed = Value end,
+})
+
+TabPlayer:CreateSlider({
+   Name = "JumpPower Hack", Range = {50, 500}, Increment = 10, CurrentValue = 50, Flag = "JP",
+   Callback = function(Value) LocalPlayer.Character.Humanoid.JumpPower = Value end,
+})
+
+TabPlayer:CreateSection("Modos Apelões")
+
+TabPlayer:CreateToggle({
+   Name = "Voo (Fly C-Frame) - INDETECTÁVEL",
+   CurrentValue = false,
+   Flag = "FlyToggle",
+   Callback = function(Value)
+      Tsuo.Player.Flying = Value
+   end,
+})
+
+TabPlayer:CreateSlider({
+   Name = "Velocidade do Voo", Range = {1, 10}, Increment = 1, CurrentValue = 2, Flag = "FlySpd",
+   Callback = function(Value) Tsuo.Player.FlySpeed = Value end,
+})
+
+-- Lógica de Fly CFrame (Ignora Anti-cheats baseados em Velocity)
+RunService.Heartbeat:Connect(function()
+    if Tsuo.Player.Flying and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
+        local hrp = LocalPlayer.Character.HumanoidRootPart
+        local cam = workspace.CurrentCamera
+        local ctrl = {f = 0, b = 0, l = 0, r = 0}
+        
+        if UserInputService:IsKeyDown(Enum.KeyCode.W) then ctrl.f = 1 end
+        if UserInputService:IsKeyDown(Enum.KeyCode.S) then ctrl.b = -1 end
+        if UserInputService:IsKeyDown(Enum.KeyCode.A) then ctrl.l = -1 end
+        if UserInputService:IsKeyDown(Enum.KeyCode.D) then ctrl.r = 1 end
+        
+        local moveDir = Vector3.new(ctrl.l + ctrl.r, 0, ctrl.f + ctrl.b)
+        if moveDir ~= Vector3.new(0, 0, 0) then
+            hrp.CFrame = hrp.CFrame + (cam.CFrame:VectorToWorldSpace(moveDir) * Tsuo.Player.FlySpeed)
+        end
+        LocalPlayer.Character.Humanoid.PlatformStand = true
+        hrp.Velocity = Vector3.new(0,0,0)
+    elseif not Tsuo.Player.Flying and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") then
+        LocalPlayer.Character.Humanoid.PlatformStand = false
+    end
+end)
+
+TabPlayer:CreateToggle({
+   Name = "Noclip (Atravessar TUDO)", CurrentValue = false, Flag = "Noclip",
+   Callback = function(Value)
+      _G.Noclip = Value
+      RunService.Stepped:Connect(function()
+         if _G.Noclip and LocalPlayer.Character then
+             for _, part in pairs(LocalPlayer.Character:GetDescendants()) do
+                 if part:IsA("BasePart") then part.CanCollide = false end
+             end
+         end
+      end)
+   end,
+})
+
+TabPlayer:CreateToggle({
+   Name = "SpinBot (Girar para quebrar mira inimiga)", CurrentValue = false, Flag = "Spin",
+   Callback = function(Value)
+      _G.Spinbot = Value
+      while _G.Spinbot do
+          task.wait()
+          if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
+              LocalPlayer.Character.HumanoidRootPart.CFrame = LocalPlayer.Character.HumanoidRootPart.CFrame * CFrame.Angles(0, math.rad(50), 0)
+          end
+      end
+   end,
+})
+
+TabPlayer:CreateButton({
+   Name = "BTools (Deletar Mapa do seu lado)",
+   Callback = function()
+      local tool1 = Instance.new("HopperBin", LocalPlayer.Backpack) tool1.BinType = "Hammer"
+      local tool2 = Instance.new("HopperBin", LocalPlayer.Backpack) tool2.BinType = "Clone"
+      local tool3 = Instance.new("HopperBin", LocalPlayer.Backpack) tool3.BinType = "Grab"
+   end,
+})
+
+--=============================================================================
+-- ABA 4: MISC & SERVER
+--=============================================================================
+TabMisc:CreateSection("Manipulação de Servidor")
+
+TabMisc:CreateButton({
+   Name = "Server Hop (Pular para Servidor Vazio)",
+   Callback = function()
+      local Http = game:GetService("HttpService")
+      local TPS = game:GetService("TeleportService")
+      local Api = "https://games.roblox.com/v1/games/"
+      local _place = game.PlaceId
+      local _servers = Api.._place.."/servers/Public?sortOrder=Asc&limit=100"
+      local function ListServers(cursor)
+          local Raw = game:HttpGet(_servers .. ((cursor and "&cursor="..cursor) or ""))
+          return Http:JSONDecode(Raw)
+      end
+      local Server, Next
+      repeat
+          local Servers = ListServers(Next)
+          Server = Servers.data[1]
+          Next = Servers.nextPageCursor
+      until Server
+      TPS:TeleportToPlaceInstance(_place, Server.id, LocalPlayer)
+   end,
+})
+
+TabMisc:CreateButton({
+   Name = "Rejoin (Entrar no mesmo server)",
+   Callback = function()
+      game:GetService("TeleportService"):TeleportToPlaceInstance(game.PlaceId, game.JobId, LocalPlayer)
+   end,
+})
+
+TabMisc:CreateSection("Otimização & Utilidades")
+
+TabMisc:CreateButton({
+   Name = "FPS Boost Supremo (Tira texturas)",
+   Callback = function()
+      for _, v in pairs(workspace:GetDescendants()) do
+          if v:IsA("BasePart") and not v.Parent:FindFirstChild("Humanoid") then
+              v.Material = Enum.Material.SmoothPlastic
+              v.Reflectance = 0
+          elseif v:IsA("Decal") or v:IsA("Texture") then
+              v:Destroy()
+          end
+      end
+      Lighting.GlobalShadows = false
+   end,
+})
+
+TabMisc:CreateToggle({
+   Name = "Anti-AFK (Bypass Kick)", CurrentValue = true, Flag = "AFK",
+   Callback = function(Value)
+      if Value then
+          LocalPlayer.Idled:Connect(function()
+              VirtualUser:Button2Down(Vector2.new(0,0), workspace.CurrentCamera.CFrame)
+              task.wait(1)
+              VirtualUser:Button2Up(Vector2.new(0,0), workspace.CurrentCamera.CFrame)
+          end)
+      end
+   end,
+})
+
+TabMisc:CreateSlider({
+   Name = "Gravidade do Servidor (Client)", Range = {0, 196}, Increment = 1, CurrentValue = 196, Flag = "Grav",
+   Callback = function(Value) workspace.Gravity = Value end,
+})
+
+-- Carrega as configs salvas (se existirem)
+Rayfield:LoadConfiguration()
