@@ -238,7 +238,6 @@ TabAimbot:CreateToggle({
    end,
 })
 
--- TriggerBot Simples via Mouse.Target
 RunService.RenderStepped:Connect(function()
     if _G.TriggerBot and Mouse.Target then
         if Mouse.Target.Parent:FindFirstChild("Humanoid") and Mouse.Target.Parent.Name ~= LocalPlayer.Name then
@@ -274,7 +273,6 @@ TabVisual:CreateToggle({
    Callback = function(Value) Tsuo.Visuals.ESP_Name = Value end,
 })
 
--- Lógica de ESP universal simplificada para Inserção
 local function CreateESP(player)
     local box = Drawing.new("Square")
     box.Visible = false
@@ -411,7 +409,6 @@ TabPlayer:CreateSlider({
    Callback = function(Value) Tsuo.Player.FlySpeed = Value end,
 })
 
--- Lógica de Fly CFrame (Ignora Anti-cheats baseados em Velocity)
 RunService.Heartbeat:Connect(function()
     if Tsuo.Player.Flying and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
         local hrp = LocalPlayer.Character.HumanoidRootPart
@@ -469,6 +466,83 @@ TabPlayer:CreateButton({
       local tool3 = Instance.new("HopperBin", LocalPlayer.Backpack) tool3.BinType = "Grab"
    end,
 })
+
+--=============================================================================
+-- ESTRATÉGIAS DE POSIÇÃO (SKYBASE & EVASÃO)
+--=============================================================================
+TabPlayer:CreateSection("Estratégias de Posição (Apelão)")
+
+local SkyBasePart = nil
+local OriginalPosition = nil
+
+TabPlayer:CreateToggle({
+   Name = "Sky Sniper (Teleporte para o Céu)",
+   CurrentValue = false,
+   Flag = "SkySnipe",
+   Callback = function(Value)
+      local character = LocalPlayer.Character
+      local hrp = character and character:FindFirstChild("HumanoidRootPart")
+      
+      if Value then
+          if hrp then
+              OriginalPosition = hrp.CFrame
+              
+              SkyBasePart = Instance.new("Part")
+              SkyBasePart.Size = Vector3.new(100, 1, 100)
+              SkyBasePart.Position = hrp.Position + Vector3.new(0, 700, 0)
+              SkyBasePart.Anchored = true
+              SkyBasePart.Transparency = 1 
+              SkyBasePart.CanCollide = true
+              SkyBasePart.Parent = workspace
+              
+              hrp.CFrame = CFrame.new(SkyBasePart.Position + Vector3.new(0, 5, 0))
+              
+              Rayfield:Notify({
+                  Title = "Sky Sniper",
+                  Content = "Você está no topo do mapa! Ninguém te alcança.",
+                  Duration = 3,
+                  Image = "crosshair"
+              })
+          end
+      else
+          if SkyBasePart then
+              SkyBasePart:Destroy()
+              SkyBasePart = nil
+          end
+          if hrp and OriginalPosition then
+              hrp.CFrame = OriginalPosition
+          end
+      end
+   end,
+})
+
+TabPlayer:CreateToggle({
+   Name = "Jitter Evasion (Quebra-Mira)",
+   CurrentValue = false,
+   Flag = "JitterEvasion",
+   Callback = function(Value)
+      _G.JitterEvasion = Value
+   end,
+})
+
+task.spawn(function()
+    while task.wait(0.3) do 
+        if _G.JitterEvasion and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
+            local hrp = LocalPlayer.Character.HumanoidRootPart
+            local currentCFrame = hrp.CFrame
+            
+            local randomX = math.random(-15, 15)
+            local randomZ = math.random(-15, 15)
+            
+            hrp.CFrame = currentCFrame * CFrame.new(randomX, 0, randomZ)
+            
+            task.wait(0.1)
+            if hrp then
+                hrp.CFrame = currentCFrame
+            end
+        end
+    end
+end)
 
 --=============================================================================
 -- ABA 4: MISC & SERVER
